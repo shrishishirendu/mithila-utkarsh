@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- Theme tokens ---------- */
+:root {
+  --cream:           #F6EBD0;
+  --cream-2:         #EFE0BC;
+  --ink:             #1B1A2E;
+  --vermillion:      #B43A2E;
+  --vermillion-dark: #8C2A21;
+  --turmeric:        #D69926;
+  --indigo:          #2A3A6B;
+  --leaf:            #486B3C;
+  --paper:           #FBF4E0;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--cream);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- Font utilities ---------- */
+.font-display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
+.font-body    { font-family: 'DM Sans', system-ui, sans-serif; }
+.font-tirhuta { font-family: 'Noto Sans Tirhuta', 'Noto Sans', serif; }
+
+/* ---------- Animations ---------- */
+@keyframes pop-in {
+  0%   { opacity: 0; transform: translateY(8px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.pop-in { animation: pop-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-4px); }
+  75%      { transform: translateX(4px); }
+}
+.shake { animation: shake 0.3s ease-in-out; }
+
+/* ---------- Utilities ---------- */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

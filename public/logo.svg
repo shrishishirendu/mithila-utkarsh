@@ -1,0 +1,63 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mithila Utkarsh — Rising sun over water in a diamond frame">
+  <!-- Background dot (acts as fill for favicon/dark-bg cases) -->
+
+  <!-- Diamond frame (kohbar / aripan tradition) -->
+  <polygon points="50,8 92,50 50,92 8,50"
+           fill="none"
+           stroke="#B43A2E"
+           stroke-width="2.8"
+           stroke-linejoin="round"/>
+
+  <!-- Inner diamond accent (subtle double-frame) -->
+  <polygon points="50,16 84,50 50,84 16,50"
+           fill="none"
+           stroke="#B43A2E"
+           stroke-width="0.8"
+           stroke-linejoin="round"
+           opacity="0.35"/>
+
+  <!-- Horizon line -->
+  <line x1="22" y1="52" x2="78" y2="52"
+        stroke="#B43A2E"
+        stroke-width="2"
+        stroke-linecap="round"/>
+
+  <!-- Rising sun (semicircle above horizon) -->
+  <path d="M 37 52 A 13 13 0 0 1 63 52 Z" fill="#D69926"/>
+  <!-- Sun inner detail -->
+  <path d="M 41 52 A 9 9 0 0 1 59 52 Z" fill="#D69926" stroke="#B43A2E" stroke-width="0.6"/>
+
+  <!-- Sun rays (5 rays radiating up) -->
+  <g stroke="#B43A2E" stroke-width="1.8" stroke-linecap="round">
+    <line x1="50" y1="26" x2="50" y2="33"/>
+    <line x1="35" y1="31" x2="39" y2="36"/>
+    <line x1="65" y1="31" x2="61" y2="36"/>
+    <line x1="26" y1="42" x2="32" y2="44"/>
+    <line x1="74" y1="42" x2="68" y2="44"/>
+  </g>
+
+  <!-- Water ripples below horizon (Mithila's ponds, fish heritage) -->
+  <path d="M 24 60 Q 31 57 38 60 T 52 60 T 66 60 T 76 60"
+        fill="none"
+        stroke="#2A3A6B"
+        stroke-width="1.6"
+        stroke-linecap="round"/>
+  <path d="M 28 67 Q 34 64 40 67 T 52 67 T 64 67 T 72 67"
+        fill="none"
+        stroke="#2A3A6B"
+        stroke-width="1.3"
+        stroke-linecap="round"
+        opacity="0.65"/>
+  <path d="M 32 73 Q 38 71 44 73 T 56 73 T 68 73"
+        fill="none"
+        stroke="#2A3A6B"
+        stroke-width="1.1"
+        stroke-linecap="round"
+        opacity="0.4"/>
+
+  <!-- Aripan dots at the four cardinal vertices -->
+  <circle cx="50" cy="4" r="1.6" fill="#B43A2E"/>
+  <circle cx="96" cy="50" r="1.6" fill="#B43A2E"/>
+  <circle cx="50" cy="96" r="1.6" fill="#B43A2E"/>
+  <circle cx="4" cy="50" r="1.6" fill="#B43A2E"/>
+</svg>
