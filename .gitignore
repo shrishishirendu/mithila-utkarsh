@@ -14,4 +14,7 @@ pnpm-debug.log*
 .idea
 .vercel
 .vscode/*
+.venv
+__pycache__
+*.pyc
 !.vscode/extensions.json
