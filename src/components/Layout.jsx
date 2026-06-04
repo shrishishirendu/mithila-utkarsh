@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Home, BookOpen, BookA, CalendarHeart, Sparkles, ShoppingBag, UserCircle,
-  Menu, X, Trophy, LogIn, LogOut, User
+  Menu, X, Trophy, LogIn, LogOut, User, Sun
 } from "lucide-react";
 import { BorderPattern } from "./Motifs.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { id: "mithilakshar", label: "Mithilakshar",  path: "/learn",       icon: BookOpen,      eyebrow: "Learn the script" },
   { id: "dictionary",   label: "Dictionary",    path: "/dictionary",  icon: BookA,         eyebrow: "Word by word" },
   { id: "festivals",    label: "Pavain & Tyohar", path: "/festivals", icon: CalendarHeart, eyebrow: "Festivals" },
+  { id: "panchang",     label: "Panchang",      path: "/panchang",    icon: Sun,           eyebrow: "Daily calendar" },
   { id: "ghatkaiti",    label: "Ghatkaiti",     path: "/ghatkaiti",   icon: Sparkles,      eyebrow: "Auspicious moments" },
   { id: "merchandise",  label: "Merchandise",   path: "/shop",        icon: ShoppingBag,   eyebrow: "Wear the heritage" },
   { id: "membership",   label: "Membership",    path: "/membership",  icon: UserCircle,    eyebrow: "Become a member" },

@@ -5,6 +5,7 @@ import MithilaksharPage from "./pages/MithilaksharPage.jsx";
 import FestivalsPage from "./pages/FestivalsPage.jsx";
 import FestivalDetailPage from "./pages/FestivalDetailPage.jsx";
 import DictionaryPage from "./pages/DictionaryPage.jsx";
+import PanchangPage from "./pages/PanchangPage.jsx";
 import GhatkaitiPage from "./pages/GhatkaitiPage.jsx";
 import MerchandisePage from "./pages/MerchandisePage.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
       { path: "dictionary",         element: <DictionaryPage /> },
       { path: "festivals",          element: <FestivalsPage /> },
       { path: "festivals/:slug",    element: <FestivalDetailPage /> },
+      { path: "panchang",           element: <PanchangPage /> },
       { path: "ghatkaiti",          element: <GhatkaitiPage /> },
       { path: "shop",               element: <MerchandisePage /> },
       { path: "membership",         element: <MembershipPage /> },
