@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { Sun, Moon, MapPin, Calendar, Clock, AlertTriangle, Loader2 } from "lucide-react";
 import { BorderPattern } from "../components/Motifs.jsx";
 import { SitaMotif } from "../components/SitaMotif.jsx";
 import { YearHeaderStrip } from "../components/YearHeaderStrip.jsx";
 import { NavadhikaraPanel } from "../components/NavadhikaraPanel.jsx";
+import { FestivalCalendar } from "../components/FestivalCalendar.jsx";
 import { metaForDate } from "../data/panchang-meta-908.js";
 import { festivalsForDate } from "../data/panchang-festivals.js";
 
@@ -44,10 +46,20 @@ export default function PanchangPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const resultRef = useRef(null);
 
   const city = CITIES.find((c) => c.id === cityId) || CITIES[0];
   const meta = metaForDate(date);
   const todaysFestivals = festivalsForDate(date);
+
+  // Picking a day in the calendar updates the selected date and brings the
+  // full result card into view.
+  function handleSelectDate(iso) {
+    setDate(iso);
+    requestAnimationFrame(() => {
+      resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -107,12 +119,22 @@ export default function PanchangPage() {
       </section>
 
       {/* Result */}
-      <section className="px-6 lg:px-10 pt-4 pb-8 max-w-5xl mx-auto">
+      <section ref={resultRef} className="px-6 lg:px-10 pt-4 pb-8 max-w-5xl mx-auto scroll-mt-4">
         {loading && <LoadingCard />}
         {error && <ErrorCard error={error} />}
         {!loading && !error && data && (
           <ResultCard data={data} city={city} date={date} festivals={todaysFestivals} />
         )}
+      </section>
+
+      {/* Month calendar with festival + tithi overlay */}
+      <section className="px-6 lg:px-10 pb-8 max-w-5xl mx-auto">
+        <FestivalCalendar
+          city={city}
+          selectedDate={date}
+          onSelectDate={handleSelectDate}
+          todayIso={todayISO()}
+        />
       </section>
 
       {/* Beta callout */}
@@ -317,12 +339,30 @@ function FestivalChip({ festival }) {
     : festival.mithilaSpecific
     ? { background: "var(--leaf)",            color: "var(--paper)" }
     : { background: "var(--cream-2)",         color: "var(--ink)"   };
-  return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium"
-          style={{ background: tone.background, color: tone.color }}>
+
+  const inner = (
+    <>
       {festival.sita && <SitaMotif size={12} color="var(--paper)" opacity={1} />}
       <span className="font-display">{festival.nameDevanagari}</span>
       <span style={{ opacity: 0.8 }}>· {festival.nameEnglish}</span>
+      {festival.slug && <span aria-hidden="true" style={{ opacity: 0.7 }}>→</span>}
+    </>
+  );
+
+  const cls = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium";
+
+  // Rich-content festivals link to their detail page; dated-only ones are plain pills.
+  if (festival.slug) {
+    return (
+      <Link to={`/festivals/${festival.slug}`} className={`${cls} transition-opacity hover:opacity-85`}
+            style={{ background: tone.background, color: tone.color }}>
+        {inner}
+      </Link>
+    );
+  }
+  return (
+    <span className={cls} style={{ background: tone.background, color: tone.color }}>
+      {inner}
     </span>
   );
 }

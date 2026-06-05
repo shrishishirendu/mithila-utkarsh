@@ -11,6 +11,7 @@ Rahu kaal, abhijit muhurta, etc.
 
 from http.server import BaseHTTPRequestHandler
 import json
+import calendar
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 import swisseph as swe
@@ -266,6 +267,74 @@ def compute_panchang(date_local, lat, lon, tz_name):
 
 
 # ============================================================================
+# LIGHTWEIGHT MONTH COMPUTATION (for the /panchang calendar grid)
+# ============================================================================
+# Returns just the tithi + nakshatra + vara reckoned at sunrise for each day —
+# skips the expensive end-time bisections so a whole month resolves in one call.
+
+def compute_tithi_lite(date_local, lat, lon, tz_name):
+    tz = ZoneInfo(tz_name)
+    jd_midnight_local = local_dt_to_jd(
+        date_local.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=tz)
+    )
+    geopos = (lon, lat, 0)
+
+    rise_result = swe.rise_trans(
+        jd_midnight_local, swe.SUN,
+        swe.CALC_RISE | swe.BIT_DISC_CENTER, geopos
+    )
+    jd_sunrise = rise_result[1][0]
+
+    diff = moon_minus_sun(jd_sunrise)
+    tithi_num = int(diff / 12) + 1
+    paksha = "shukla" if tithi_num <= 15 else "krishna"
+    tithi_in_paksha = tithi_num if tithi_num <= 15 else tithi_num - 15
+
+    moon_lon = moon_longitude(jd_sunrise)
+    nakshatra_num = int(moon_lon / (360 / 27)) + 1
+
+    weekday_num = int((jd_sunrise + 1.5) % 7)
+
+    return {
+        "date": date_local.strftime("%Y-%m-%d"),
+        "tithi": {
+            "number_overall": tithi_num,
+            "number_in_paksha": tithi_in_paksha,
+            "name": TITHI_NAMES[tithi_num - 1],
+            "paksha": paksha,
+        },
+        "nakshatra": {
+            "number": nakshatra_num,
+            "name": NAKSHATRAS[nakshatra_num - 1],
+        },
+        "vara": {
+            "number": weekday_num,
+            "english": VARA_NAMES[weekday_num],
+        },
+    }
+
+
+def compute_month(year, month, lat, lon, tz_name):
+    num_days = calendar.monthrange(year, month)[1]
+    days = []
+    for d in range(1, num_days + 1):
+        date_local = datetime(year, month, d)
+        try:
+            days.append(compute_tithi_lite(date_local, lat, lon, tz_name))
+        except Exception:
+            # Don't fail the whole month for one bad day (e.g. polar no-sunrise edge cases)
+            days.append({
+                "date": date_local.strftime("%Y-%m-%d"),
+                "tithi": None, "nakshatra": None, "vara": None,
+            })
+    return {
+        "month": f"{year:04d}-{month:02d}",
+        "location": {"lat": lat, "lon": lon, "timezone": tz_name},
+        "days": days,
+    }
+
+
+# ============================================================================
 # VERCEL HANDLER
 # ============================================================================
 
@@ -277,10 +346,40 @@ class handler(BaseHTTPRequestHandler):
 
             # Parse and validate parameters
             date_str = params.get("date", [None])[0]
+            month_str = params.get("month", [None])[0]
             lat_str = params.get("lat", [None])[0]
             lon_str = params.get("lon", [None])[0]
             tz_name = params.get("tz", ["UTC"])[0]
 
+            try:
+                ZoneInfo(tz_name)
+            except Exception:
+                self._send_error(400, f"Invalid timezone: {tz_name}")
+                return
+
+            # ---- Month mode: lightweight tithi grid for the calendar ----
+            if month_str:
+                if not all([lat_str, lon_str]):
+                    self._send_error(400, "Missing required parameters: lat, lon")
+                    return
+                try:
+                    year, month = (int(p) for p in month_str.split("-"))
+                    if not (1 <= month <= 12):
+                        raise ValueError
+                except ValueError:
+                    self._send_error(400, f"Invalid month format. Use YYYY-MM. Got: {month_str}")
+                    return
+                try:
+                    lat = float(lat_str)
+                    lon = float(lon_str)
+                except ValueError:
+                    self._send_error(400, "lat and lon must be numbers")
+                    return
+                result = compute_month(year, month, lat, lon, tz_name)
+                self._send_json(result)
+                return
+
+            # ---- Single-date mode ----
             if not all([date_str, lat_str, lon_str]):
                 self._send_error(400, "Missing required parameters: date, lat, lon")
                 return
@@ -298,25 +397,20 @@ class handler(BaseHTTPRequestHandler):
                 self._send_error(400, "lat and lon must be numbers")
                 return
 
-            try:
-                ZoneInfo(tz_name)
-            except Exception:
-                self._send_error(400, f"Invalid timezone: {tz_name}")
-                return
-
             # Compute
             result = compute_panchang(date_local, lat, lon, tz_name)
-
-            # Respond
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Cache-Control", "public, max-age=3600")
-            self.end_headers()
-            self.wfile.write(json.dumps(result, indent=2).encode("utf-8"))
+            self._send_json(result)
 
         except Exception as e:
             self._send_error(500, f"Server error: {str(e)}")
+
+    def _send_json(self, result):
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Cache-Control", "public, max-age=3600")
+        self.end_headers()
+        self.wfile.write(json.dumps(result, indent=2).encode("utf-8"))
 
     def _send_error(self, code, message):
         self.send_response(code)
