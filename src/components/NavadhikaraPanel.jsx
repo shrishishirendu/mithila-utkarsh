@@ -34,23 +34,23 @@ export function NavadhikaraPanel({ meta }) {
         </div>
       </div>
 
-      {/* Officers list — responsive: 2 on mobile, 4 on tablet+ */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px"
+      {/* Officers list — responsive: 2 on mobile, all 7 on one line at tablet+ */}
+      <div className="grid grid-cols-2 sm:grid-cols-7 gap-px"
            style={{ background: "var(--cream-2)", borderTop: "1px solid var(--cream-2)" }}>
         {meta.officers.map((o, i) => {
           const Icon = ROLE_ICONS[o.role];
           return (
-            <div key={i} className="px-3 py-2.5" style={{ background: "var(--paper)" }}>
-              <div className="flex items-center gap-1.5">
-                {Icon && <Icon className="w-3 h-3" style={{ color: "var(--indigo)" }} />}
-                <div className="text-[9px] tracking-[0.16em] uppercase font-semibold"
+            <div key={i} className="px-2 py-2.5" style={{ background: "var(--paper)" }}>
+              <div className="flex items-center gap-1">
+                {Icon && <Icon className="w-3 h-3 shrink-0" style={{ color: "var(--indigo)" }} />}
+                <div className="text-[9px] tracking-[0.08em] uppercase font-semibold leading-tight"
                      style={{ color: "var(--indigo)", opacity: 0.85 }}>
                   {o.roleEn}
                 </div>
               </div>
               <div className="font-display text-sm mt-1 leading-tight">
                 {o.planet}
-                <span className="text-[10px] ml-1" style={{ opacity: 0.55 }}>
+                <span className="block text-[10px] mt-0.5" style={{ opacity: 0.55 }}>
                   {o.planetEn}
                 </span>
               </div>
