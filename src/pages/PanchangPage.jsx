@@ -236,6 +236,15 @@ function ResultCard({ data, city, date, festivals }) {
             {data.vara.sanskrit}
           </span>
         </div>
+        {data.maas && data.maas.purnimanta && (
+          <div className="font-display text-lg mt-1" style={{ color: "var(--vermillion-dark)" }}>
+            {data.maas.purnimanta.devanagari}
+            <span className="text-sm italic ml-1.5" style={{ opacity: 0.85 }}>{data.maas.purnimanta.roman}</span>
+            <span className="text-xs ml-1.5" style={{ opacity: 0.7 }}>
+              · {data.tithi.paksha === "shukla" ? "Shukla" : "Krishna"} paksha
+            </span>
+          </div>
+        )}
         <div className="text-sm mt-0.5" style={{ opacity: 0.65 }}>
           {formatLongDate(date)} · {city.name}, {city.region}
         </div>

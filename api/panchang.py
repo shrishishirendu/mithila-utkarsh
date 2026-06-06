@@ -61,6 +61,23 @@ RASHIS = [
     "Tula", "Vrishchika", "Dhanu", "Makara", "Kumbha", "Meena"
 ]
 
+# Maithili lunar months, indexed by the rashi the Sun ENTERS during the month
+# (month containing Mesha Sankranti = Baisakh, etc.).
+MAITHILI_MONTHS = [
+    ("बैसाख",  "Baisakh"),   # Mesha
+    ("जेठ",    "Jeth"),      # Vrishabha
+    ("अषाढ़",   "Asadh"),     # Mithuna
+    ("सावन",   "Saon"),      # Karka
+    ("भादो",   "Bhado"),     # Simha
+    ("आसिन",   "Aasin"),     # Kanya
+    ("कातिक",  "Katik"),     # Tula
+    ("अगहन",   "Aghan"),     # Vrishchika
+    ("पूस",    "Pus"),       # Dhanu
+    ("माघ",    "Magh"),      # Makara
+    ("फागुन",  "Phagun"),    # Kumbha
+    ("चैत",    "Chait"),     # Meena
+]
+
 RAHU_KAAL_PORTION = {
     0: 8, 1: 2, 2: 7, 3: 5, 4: 6, 5: 4, 6: 3
 }
@@ -115,6 +132,70 @@ def moon_minus_sun(jd_ut):
 
 def moon_plus_sun(jd_ut):
     return (moon_longitude(jd_ut) + sun_longitude(jd_ut)) % 360
+
+
+# ----------------------------------------------------------------------------
+# Lunar month (maas) — amanta & purnimanta, with Adhik (leap) detection.
+# A lunar month runs new-moon → new-moon. It is named after the solar month
+# (sankranti) that falls within it; a lunar month with no sankranti is Adhik
+# (leap) and takes the following month's name.
+# ----------------------------------------------------------------------------
+
+def _elong_signed(jd_ut):
+    # Moon-Sun elongation mapped to (-180, 180]; 0 at new moon (amavasya end).
+    e = (moon_longitude(jd_ut) - sun_longitude(jd_ut)) % 360
+    return e - 360 if e > 180 else e
+
+
+def _find_new_moon(approx_jd):
+    # Refine a new-moon time near approx_jd by bisecting the signed elongation.
+    lo, hi = approx_jd - 2.5, approx_jd + 2.5
+    for _ in range(60):
+        mid = (lo + hi) / 2
+        if _elong_signed(mid) < 0:
+            lo = mid
+        else:
+            hi = mid
+    return (lo + hi) / 2
+
+
+def _amanta_for_window(prev_nm, next_nm):
+    # (month_index, is_adhik) for the lunar month [prev_nm, next_nm].
+    # The month is named after the rashi the Sun occupies at the *starting* new
+    # moon; it's Adhik (leap) when the Sun doesn't change rashi within the window
+    # (no sankranti), in which case the same name repeats as the following nija month.
+    r_start = int(sun_longitude(prev_nm) / 30) % 12
+    r_end = int(sun_longitude(next_nm - 0.05) / 30) % 12
+    is_adhik = (r_start == r_end)
+    return r_start, is_adhik
+
+
+def maas_for_jd(jd_ut):
+    elong = (moon_longitude(jd_ut) - sun_longitude(jd_ut)) % 360
+    prev_nm = _find_new_moon(jd_ut - elong / 12.19)   # ~12.19°/day mean elongation rate
+    next_nm = _find_new_moon(prev_nm + 29.53)
+
+    a_idx, a_adhik = _amanta_for_window(prev_nm, next_nm)
+
+    # Purnimanta: the bright half shares the amanta name; the dark half (after
+    # Purnima) carries the next month's name.
+    tithi_num = int(elong / 12) + 1
+    if tithi_num <= 15:
+        p_idx, p_adhik = a_idx, a_adhik
+    else:
+        nn2 = _find_new_moon(next_nm + 29.53)
+        p_idx, p_adhik = _amanta_for_window(next_nm, nn2)
+
+    def block(idx, adhik):
+        dev, rom = MAITHILI_MONTHS[idx]
+        return {
+            "index": idx,
+            "devanagari": ("अधिक " + dev) if adhik else dev,
+            "roman": ("Adhik " + rom) if adhik else rom,
+            "adhik": adhik,
+        }
+
+    return {"amanta": block(a_idx, a_adhik), "purnimanta": block(p_idx, p_adhik)}
 
 
 # ============================================================================
@@ -230,6 +311,7 @@ def compute_panchang(date_local, lat, lon, tz_name):
             "sanskrit": VARA_NAMES_SANSKRIT[weekday_num],
             "number": weekday_num
         },
+        "maas": maas_for_jd(jd),
         "tithi": {
             "number_overall": tithi_num,
             "number_in_paksha": tithi_in_paksha,
@@ -337,12 +419,15 @@ def compute_day_grid(date_local, lat, lon, tz_name):
     # Vara from the civil date (see compute_panchang note on the off-by-one).
     weekday_num = (date_local.weekday() + 1) % 7
 
+    maas = maas_for_jd(jd_ref)
+
     return {
         "date": date_local.strftime("%Y-%m-%d"),
         "sunrise": sunrise,
         "sunset": sunset,
         "moonrise": moonrise,
         "moonset": moonset,
+        "maas": maas,
         "tithi": {
             "number_overall": tithi_num,
             "number_in_paksha": tithi_in_paksha,

@@ -95,6 +95,15 @@ export function FestivalCalendar({ city, selectedDate, onSelectDate, todayIso })
   const leading = Array.from({ length: firstWeekday }, () => null);
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
+  // Distinct Maithili maas (purnimanta — Mithila convention) spanning the visible month.
+  const maasList = [];
+  days.forEach((d) => {
+    const m = byDate[isoFor(view.year, view.month, d)]?.maas?.purnimanta;
+    if (m && (maasList.length === 0 || maasList[maasList.length - 1].roman !== m.roman)) {
+      maasList.push(m);
+    }
+  });
+
   function dayProps(d) {
     const dayIso = isoFor(view.year, view.month, d);
     return {
@@ -117,13 +126,23 @@ export function FestivalCalendar({ city, selectedDate, onSelectDate, todayIso })
         <div>
           <div className="text-[10px] tracking-[0.18em] uppercase font-semibold"
                style={{ color: "var(--indigo)" }}>
-            Panchang calendar · पञ्चाङ्ग
+            Maithili maas · माथिली मास
           </div>
-          <div className="font-display text-2xl leading-tight mt-0.5 flex items-center gap-2">
-            {MONTH_NAMES[view.month - 1]} {view.year}
-            {loading && <Loader2 className="w-4 h-4 animate-spin" style={{ color: "var(--indigo)" }} />}
+          {/* Maithili maas — the prominent title (purnimanta, Mithila convention) */}
+          <div className="font-display text-2xl sm:text-3xl leading-tight mt-0.5"
+               style={{ color: "var(--vermillion-dark)" }}>
+            {maasList.length > 0 ? maasList.map((m) => m.devanagari).join(" – ") : "…"}
+            {maasList.length > 0 && (
+              <span className="text-base italic ml-2" style={{ opacity: 0.8 }}>
+                {maasList.map((m) => m.roman).join(" – ")}
+              </span>
+            )}
           </div>
-          <div className="text-[11px]" style={{ opacity: 0.6 }}>{city.name}, {city.region}</div>
+          {/* Gregorian month + city, secondary */}
+          <div className="text-[11px] mt-1 flex items-center gap-2" style={{ opacity: 0.6 }}>
+            {MONTH_NAMES[view.month - 1]} {view.year} · {city.name}, {city.region}
+            {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: "var(--indigo)" }} />}
+          </div>
         </div>
         <div className="flex items-center gap-1.5">
           <NavButton onClick={() => shift(-1)} label="Previous month"><ChevronLeft className="w-4 h-4" /></NavButton>
@@ -235,10 +254,14 @@ function DayCellRich({ day, info, fests, isSelected, isToday, onClick }) {
       </div>
 
       {t ? (
-        <div className="text-[11px] font-semibold leading-tight"
-             style={{ color: special ? "var(--indigo)" : "var(--ink)" }}>
-          {t.name === "Purnima" && "● "}{t.name === "Amavasya" && "○ "}{t.name}
-          <span className="font-normal" style={{ opacity: 0.6 }}> · {pakshaLabel(t.paksha)}</span>
+        <div className="leading-tight">
+          <div className="text-[11px] font-semibold"
+               style={{ color: special ? "var(--indigo)" : "var(--ink)" }}>
+            {t.name === "Purnima" && "● "}{t.name === "Amavasya" && "○ "}{t.name}
+          </div>
+          <div className="text-[9px] truncate" style={{ opacity: 0.6 }}>
+            {info?.maas?.purnimanta ? `${info.maas.purnimanta.roman} · ` : ""}{pakshaLabel(t.paksha)}
+          </div>
         </div>
       ) : (
         <div className="text-[9px]" style={{ opacity: 0.4 }}>—</div>
@@ -293,9 +316,11 @@ function DayRow({ day, info, fests, weekdayShort, isSelected, isToday, onClick }
 
       <div className="flex-1 min-w-0">
         {t ? (
-          <div className="text-sm font-semibold leading-tight">
-            {t.name}
-            <span className="text-[11px] font-normal" style={{ opacity: 0.6 }}> · {pakshaLabel(t.paksha)}</span>
+          <div className="leading-tight">
+            <div className="text-sm font-semibold">{t.name}</div>
+            <div className="text-[11px]" style={{ opacity: 0.6 }}>
+              {info?.maas?.purnimanta ? `${info.maas.purnimanta.roman} · ` : ""}{pakshaLabel(t.paksha)}
+            </div>
           </div>
         ) : (
           <div className="text-sm" style={{ opacity: 0.4 }}>—</div>
