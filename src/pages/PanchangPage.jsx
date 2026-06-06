@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Sun, Moon, MapPin, Calendar, Clock, AlertTriangle, Loader2 } from "lucide-react";
+import { Sun, Moon, MapPin, Clock, AlertTriangle, Loader2 } from "lucide-react";
 import { BorderPattern } from "../components/Motifs.jsx";
 import { SitaMotif } from "../components/SitaMotif.jsx";
 import { YearHeaderStrip } from "../components/YearHeaderStrip.jsx";
@@ -66,7 +66,8 @@ export default function PanchangPage() {
     setLoading(true);
     setError(null);
     const url = `/api/panchang?date=${date}&lat=${city.lat}&lon=${city.lon}&tz=${encodeURIComponent(city.tz)}`;
-    fetch(url)
+    // In dev, bypass the browser HTTP cache so engine changes always show.
+    fetch(url, import.meta.env.DEV ? { cache: "no-store" } : undefined)
       .then(async (r) => {
         if (!r.ok) {
           const body = await r.json().catch(() => ({}));
@@ -84,57 +85,47 @@ export default function PanchangPage() {
     <div className="font-body min-h-screen" style={{ color: "var(--ink)" }}>
       <PanchangHero meta={meta} />
 
-      {/* Form */}
+      {/* City control — the only input; the calendar drives the date */}
       <section className="px-6 lg:px-10 py-4 max-w-5xl mx-auto">
         <div className="rounded-3xl p-5 sm:p-6 border"
              style={{ background: "var(--paper)", borderColor: "var(--cream-2)" }}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <label className="block">
-              <span className="text-[10px] tracking-[0.18em] uppercase font-semibold flex items-center gap-1.5"
-                    style={{ color: "var(--indigo)" }}>
-                <MapPin className="w-3 h-3" /> City
-              </span>
-              <select value={cityId}
-                      onChange={(e) => setCityId(e.target.value)}
-                      className="mt-2 w-full px-3 py-2.5 rounded-xl text-sm border outline-none focus:ring-2"
-                      style={{ background: "var(--cream)", borderColor: "var(--cream-2)" }}>
-                {CITIES.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name} — {c.region}</option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="text-[10px] tracking-[0.18em] uppercase font-semibold flex items-center gap-1.5"
-                    style={{ color: "var(--indigo)" }}>
-                <Calendar className="w-3 h-3" /> Date
-              </span>
-              <input type="date"
-                     value={date}
-                     onChange={(e) => setDate(e.target.value)}
-                     className="mt-2 w-full px-3 py-2.5 rounded-xl text-sm border outline-none focus:ring-2"
-                     style={{ background: "var(--cream)", borderColor: "var(--cream-2)" }} />
-            </label>
-          </div>
+          <label className="block max-w-md">
+            <span className="text-[10px] tracking-[0.18em] uppercase font-semibold flex items-center gap-1.5"
+                  style={{ color: "var(--indigo)" }}>
+              <MapPin className="w-3 h-3" /> City
+            </span>
+            <select value={cityId}
+                    onChange={(e) => setCityId(e.target.value)}
+                    className="mt-2 w-full px-3 py-2.5 rounded-xl text-sm border outline-none focus:ring-2"
+                    style={{ background: "var(--cream)", borderColor: "var(--cream-2)" }}>
+              {CITIES.map((c) => (
+                <option key={c.id} value={c.id}>{c.name} — {c.region}</option>
+              ))}
+            </select>
+            <span className="block text-[11px] mt-2" style={{ opacity: 0.55 }}>
+              Pick a day in the calendar below to see its full panchang.
+            </span>
+          </label>
         </div>
       </section>
 
-      {/* Result */}
-      <section ref={resultRef} className="px-6 lg:px-10 pt-4 pb-8 max-w-5xl mx-auto scroll-mt-4">
-        {loading && <LoadingCard />}
-        {error && <ErrorCard error={error} />}
-        {!loading && !error && data && (
-          <ResultCard data={data} city={city} date={date} festivals={todaysFestivals} />
-        )}
-      </section>
-
-      {/* Month calendar with festival + tithi overlay */}
-      <section className="px-6 lg:px-10 pb-8 max-w-5xl mx-auto">
+      {/* Month calendar — the primary date navigator */}
+      <section className="px-6 lg:px-10 pt-2 pb-6 max-w-5xl mx-auto">
         <FestivalCalendar
           city={city}
           selectedDate={date}
           onSelectDate={handleSelectDate}
           todayIso={todayISO()}
         />
+      </section>
+
+      {/* Selected-day detail */}
+      <section ref={resultRef} className="px-6 lg:px-10 pt-2 pb-8 max-w-5xl mx-auto scroll-mt-4">
+        {loading && <LoadingCard />}
+        {error && <ErrorCard error={error} />}
+        {!loading && !error && data && (
+          <ResultCard data={data} city={city} date={date} festivals={todaysFestivals} />
+        )}
       </section>
 
       {/* Beta callout */}

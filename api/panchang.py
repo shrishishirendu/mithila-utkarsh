@@ -11,6 +11,7 @@ Rahu kaal, abhijit muhurta, etc.
 
 from http.server import BaseHTTPRequestHandler
 import json
+import os
 import calendar
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
@@ -53,6 +54,12 @@ MOVABLE_KARANAS = ["Bava", "Balava", "Kaulava", "Taitila", "Garaja", "Vanija", "
 
 VARA_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 VARA_NAMES_SANSKRIT = ["Ravivara", "Somavara", "Mangalvara", "Budhavara", "Guruvara", "Shukravara", "Shanivara"]
+
+# Zodiac signs (rashis) by sidereal longitude / 30°. Used for the Moon's rashi.
+RASHIS = [
+    "Mesha", "Vrishabha", "Mithuna", "Karka", "Simha", "Kanya",
+    "Tula", "Vrishchika", "Dhanu", "Makara", "Kumbha", "Meena"
+]
 
 RAHU_KAAL_PORTION = {
     0: 8, 1: 2, 2: 7, 3: 5, 4: 6, 5: 4, 6: 3
@@ -195,8 +202,10 @@ def compute_panchang(date_local, lat, lon, tz_name):
     else:
         karana_name = MOVABLE_KARANAS[(karana_index_overall - 1) % 7]
 
-    # Vara
-    weekday_num = int((jd_sunrise + 1.5) % 7)
+    # Vara — the civil weekday of the local date (Sun=0..Sat=6). Derived from the
+    # calendar date, not jd_sunrise: the UT fractional offset of an early sunrise
+    # could push int((jd+1.5)%7) off by one day.
+    weekday_num = (date_local.weekday() + 1) % 7
     vara_name = VARA_NAMES[weekday_num]
 
     # Rahu kaal
@@ -267,36 +276,73 @@ def compute_panchang(date_local, lat, lon, tz_name):
 
 
 # ============================================================================
-# LIGHTWEIGHT MONTH COMPUTATION (for the /panchang calendar grid)
+# MONTH GRID COMPUTATION (for the /panchang calendar)
 # ============================================================================
-# Returns just the tithi + nakshatra + vara reckoned at sunrise for each day —
-# skips the expensive end-time bisections so a whole month resolves in one call.
+# Per day: sunrise, sunset, moonrise, moonset, plus tithi + nakshatra + vara
+# reckoned at sunrise. Skips the expensive tithi/nakshatra end-time bisections
+# (those come from the single-date endpoint on click) so a whole month is one call.
 
-def compute_tithi_lite(date_local, lat, lon, tz_name):
+def compute_day_grid(date_local, lat, lon, tz_name):
     tz = ZoneInfo(tz_name)
-    jd_midnight_local = local_dt_to_jd(
+    jd_midnight = local_dt_to_jd(
         date_local.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=tz)
     )
     geopos = (lon, lat, 0)
 
-    rise_result = swe.rise_trans(
-        jd_midnight_local, swe.SUN,
-        swe.CALC_RISE | swe.BIT_DISC_CENTER, geopos
-    )
-    jd_sunrise = rise_result[1][0]
+    # Find the next rise/set of a body after local midnight; returns (jd, iso) or (None, None).
+    def event(body, flag):
+        try:
+            ret, tret = swe.rise_trans(
+                jd_midnight, body, flag | swe.BIT_DISC_CENTER, geopos
+            )
+            if ret < 0 or not tret or not tret[0]:
+                return None, None
+            return tret[0], jd_to_local_dt(tret[0], tz).isoformat()
+        except Exception:
+            return None, None
 
-    diff = moon_minus_sun(jd_sunrise)
+    jd_sunrise, sunrise = event(swe.SUN, swe.CALC_RISE)
+    _, sunset = event(swe.SUN, swe.CALC_SET)
+    _, moonrise = event(swe.MOON, swe.CALC_RISE)
+    _, moonset = event(swe.MOON, swe.CALC_SET)
+
+    # Tithi / nakshatra / vara are reckoned at sunrise (fall back to midnight if no sunrise).
+    jd_ref = jd_sunrise if jd_sunrise else jd_midnight
+
+    diff = moon_minus_sun(jd_ref)
     tithi_num = int(diff / 12) + 1
     paksha = "shukla" if tithi_num <= 15 else "krishna"
     tithi_in_paksha = tithi_num if tithi_num <= 15 else tithi_num - 15
 
-    moon_lon = moon_longitude(jd_sunrise)
-    nakshatra_num = int(moon_lon / (360 / 27)) + 1
+    moon_lon = moon_longitude(jd_ref)
+    nakshatra_size = 360 / 27
+    nakshatra_num = int(moon_lon / nakshatra_size) + 1
+    rashi_num = int(moon_lon / 30)  # 0-11
 
-    weekday_num = int((jd_sunrise + 1.5) % 7)
+    # Nakshatra end time — one bisection (tithi end stays on the single-date endpoint).
+    target_moon_lon = nakshatra_num * nakshatra_size
+    try:
+        if target_moon_lon >= 360:
+            target_eff = target_moon_lon - 360
+            jd_nak_end = find_endpoint(
+                jd_ref, jd_ref + 1.5, target_eff,
+                lambda j: moon_longitude(j) if moon_longitude(j) < moon_lon else moon_longitude(j) - 360
+            )
+        else:
+            jd_nak_end = find_endpoint(jd_ref, jd_ref + 1.5, target_moon_lon, moon_longitude)
+        nakshatra_end_iso = jd_to_local_dt(jd_nak_end, tz).isoformat()
+    except Exception:
+        nakshatra_end_iso = None
+
+    # Vara from the civil date (see compute_panchang note on the off-by-one).
+    weekday_num = (date_local.weekday() + 1) % 7
 
     return {
         "date": date_local.strftime("%Y-%m-%d"),
+        "sunrise": sunrise,
+        "sunset": sunset,
+        "moonrise": moonrise,
+        "moonset": moonset,
         "tithi": {
             "number_overall": tithi_num,
             "number_in_paksha": tithi_in_paksha,
@@ -306,6 +352,11 @@ def compute_tithi_lite(date_local, lat, lon, tz_name):
         "nakshatra": {
             "number": nakshatra_num,
             "name": NAKSHATRAS[nakshatra_num - 1],
+            "ends_at": nakshatra_end_iso,
+        },
+        "rashi": {
+            "number": rashi_num + 1,
+            "name": RASHIS[rashi_num],
         },
         "vara": {
             "number": weekday_num,
@@ -320,11 +371,12 @@ def compute_month(year, month, lat, lon, tz_name):
     for d in range(1, num_days + 1):
         date_local = datetime(year, month, d)
         try:
-            days.append(compute_tithi_lite(date_local, lat, lon, tz_name))
+            days.append(compute_day_grid(date_local, lat, lon, tz_name))
         except Exception:
             # Don't fail the whole month for one bad day (e.g. polar no-sunrise edge cases)
             days.append({
                 "date": date_local.strftime("%Y-%m-%d"),
+                "sunrise": None, "sunset": None, "moonrise": None, "moonset": None,
                 "tithi": None, "nakshatra": None, "vara": None,
             })
     return {
@@ -405,10 +457,13 @@ class handler(BaseHTTPRequestHandler):
             self._send_error(500, f"Server error: {str(e)}")
 
     def _send_json(self, result):
+        # The local dev server sets PANCHANG_NO_CACHE so engine changes show
+        # immediately; production keeps the 1-hour cache (a date's panchang is fixed).
+        cache = "no-store" if os.environ.get("PANCHANG_NO_CACHE") else "public, max-age=3600"
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Cache-Control", "public, max-age=3600")
+        self.send_header("Cache-Control", cache)
         self.end_headers()
         self.wfile.write(json.dumps(result, indent=2).encode("utf-8"))
 
