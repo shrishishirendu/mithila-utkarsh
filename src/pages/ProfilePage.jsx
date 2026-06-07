@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
-import { User, MapPin, FileText, Loader2, CheckCircle2, LogOut, Home, Building2, Briefcase, Users } from "lucide-react";
+import { Navigate, Link } from "react-router-dom";
+import { User, MapPin, FileText, Loader2, CheckCircle2, LogOut, Home, Building2, Briefcase, Users, ShieldCheck } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import { supabase } from "../lib/supabase.js";
 import { PageHero } from "../components/PageBuildingBlocks.jsx";
@@ -64,6 +64,7 @@ export default function ProfilePage() {
   const [village, setVillage] = useState("");
   const [profession, setProfession] = useState("");
   const [listed, setListed] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Load the user's profile from Supabase
   useEffect(() => {
@@ -74,7 +75,7 @@ export default function ProfilePage() {
       setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("display_name, city, bio, district, village, profession, listed")
+        .select("display_name, city, bio, district, village, profession, listed, is_admin")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -90,6 +91,7 @@ export default function ProfilePage() {
         setVillage(data.village || "");
         setProfession(data.profession || "");
         setListed(!!data.listed);
+        setIsAdmin(!!data.is_admin);
       }
       setLoading(false);
     })();
@@ -269,6 +271,14 @@ export default function ProfilePage() {
             </form>
           )}
         </div>
+
+        {isAdmin && (
+          <Link to="/admin/words"
+                className="mt-6 flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition-opacity hover:opacity-85"
+                style={{ background: "var(--cream-2)", color: "var(--indigo)" }}>
+            <ShieldCheck className="w-4 h-4" /> Admin · AI Word Bank →
+          </Link>
+        )}
 
         <div className="mt-10" style={{ color: "var(--vermillion)", opacity: 0.4 }}>
           <BorderPattern />

@@ -41,6 +41,23 @@ export default function TranslatePage() {
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
       setAi(j);
+      // Best-effort: capture into the AI word bank, deduped by the English source.
+      // (Unverified suggestions; admins review & promote to the real dictionary.)
+      if (j?.devanagari && user) {
+        supabase
+          .from("ai_word_bank")
+          .upsert(
+            {
+              source_en: text.toLowerCase(),
+              devanagari: j.devanagari,
+              iast: j.iast || null,
+              confidence: j.confidence || null,
+              created_by: user.id,
+            },
+            { onConflict: "source_en", ignoreDuplicates: true }
+          )
+          .then(() => {}, () => {});
+      }
     } catch (e) {
       setAiError(e.message);
     } finally {

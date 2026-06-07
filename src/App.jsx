@@ -17,6 +17,7 @@ import SignInPage from "./pages/SignInPage.jsx";
 import SignUpPage from "./pages/SignUpPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
+import AdminWordsPage from "./pages/AdminWordsPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
       { path: "signin",             element: <SignInPage /> },
       { path: "signup",             element: <SignUpPage /> },
       { path: "profile",            element: <ProfilePage /> },
+      { path: "admin/words",        element: <AdminWordsPage /> },
       { path: "*",                  element: <NotFoundPage /> },
     ],
   },
