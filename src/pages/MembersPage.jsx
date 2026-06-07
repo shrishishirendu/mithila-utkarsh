@@ -32,7 +32,7 @@ export default function MembersPage() {
       setError(null);
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, display_name, city, native_place, profession, bio")
+        .select("id, display_name, city, district, village, profession, bio")
         .eq("listed", true)
         .order("display_name", { ascending: true });
       if (cancelled) return;
@@ -47,7 +47,7 @@ export default function MembersPage() {
     const q = query.trim().toLowerCase();
     if (!q) return members;
     return members.filter((m) =>
-      [m.display_name, m.city, m.native_place, m.profession, m.bio]
+      [m.display_name, m.city, m.district, m.village, m.profession, m.bio]
         .filter(Boolean)
         .some((f) => f.toLowerCase().includes(q))
     );
@@ -77,7 +77,7 @@ export default function MembersPage() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by name, city, native place, profession…"
+                placeholder="Search by name, city, village, district, profession…"
                 className="w-full pl-11 pr-4 py-3 rounded-2xl text-sm"
                 style={{ background: "var(--cream)", border: "1px solid var(--cream-2)", color: "var(--ink)", outline: "none" }}
               />
@@ -144,8 +144,8 @@ function MemberCard({ m }) {
           {m.city && (
             <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" style={{ color: "var(--indigo)" }} />{m.city}</span>
           )}
-          {m.native_place && (
-            <span className="inline-flex items-center gap-1"><Home className="w-3 h-3" style={{ color: "var(--leaf)" }} />{m.native_place}</span>
+          {(m.village || m.district) && (
+            <span className="inline-flex items-center gap-1"><Home className="w-3 h-3" style={{ color: "var(--leaf)" }} />{[m.village, m.district].filter(Boolean).join(", ")}</span>
           )}
           {m.profession && (
             <span className="inline-flex items-center gap-1"><Briefcase className="w-3 h-3" style={{ color: "var(--turmeric)" }} />{m.profession}</span>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { User, MapPin, FileText, Loader2, CheckCircle2, LogOut, Home, Briefcase, Users } from "lucide-react";
+import { User, MapPin, FileText, Loader2, CheckCircle2, LogOut, Home, Building2, Briefcase, Users } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import { supabase } from "../lib/supabase.js";
 import { PageHero } from "../components/PageBuildingBlocks.jsx";
@@ -60,7 +60,8 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState("");
   const [city, setCity] = useState("");
   const [bio, setBio] = useState("");
-  const [nativePlace, setNativePlace] = useState("");
+  const [district, setDistrict] = useState("");
+  const [village, setVillage] = useState("");
   const [profession, setProfession] = useState("");
   const [listed, setListed] = useState(false);
 
@@ -73,7 +74,7 @@ export default function ProfilePage() {
       setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("display_name, city, bio, native_place, profession, listed")
+        .select("display_name, city, bio, district, village, profession, listed")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -85,7 +86,8 @@ export default function ProfilePage() {
         setDisplayName(data.display_name || "");
         setCity(data.city || "");
         setBio(data.bio || "");
-        setNativePlace(data.native_place || "");
+        setDistrict(data.district || "");
+        setVillage(data.village || "");
         setProfession(data.profession || "");
         setListed(!!data.listed);
       }
@@ -120,7 +122,8 @@ export default function ProfilePage() {
         display_name: displayName.trim() || null,
         city: city || null,
         bio: bio.trim() || null,
-        native_place: nativePlace.trim() || null,
+        district: district.trim() || null,
+        village: village.trim() || null,
         profession: profession.trim() || null,
         listed,
         updated_at: new Date().toISOString(),
@@ -186,11 +189,19 @@ export default function ProfilePage() {
               />
 
               <Field
+                icon={Building2}
+                label="District (optional)"
+                value={district}
+                onChange={setDistrict}
+                placeholder="e.g. Madhubani, Darbhanga, Sitamarhi"
+              />
+
+              <Field
                 icon={Home}
-                label="Native place in Mithila (optional)"
-                value={nativePlace}
-                onChange={setNativePlace}
-                placeholder="Your मूल / village / town — e.g. Sourath, Madhubani"
+                label="Village (optional)"
+                value={village}
+                onChange={setVillage}
+                placeholder="Your village or town"
               />
 
               <Field
