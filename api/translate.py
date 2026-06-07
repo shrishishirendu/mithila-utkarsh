@@ -28,8 +28,12 @@ MAX_INPUT_CHARS = 200  # cheap guard against abuse / runaway cost per call
 # endpoint requires a valid Supabase session token (a real gate, not just the UI
 # button). When unset, it falls back to the UI sign-in gate — so pushing this does
 # not break anything before the env vars are configured.
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY")
+# Reuse the existing VITE_-prefixed Vercel env vars if dedicated ones aren't set
+# (same Supabase URL + publishable key — no extra setup needed).
+SUPABASE_URL = os.environ.get("SUPABASE_URL") or os.environ.get("VITE_SUPABASE_URL")
+SUPABASE_ANON_KEY = (
+    os.environ.get("SUPABASE_ANON_KEY") or os.environ.get("VITE_SUPABASE_PUBLISHABLE_KEY")
+)
 
 
 def verify_user(auth_header):
