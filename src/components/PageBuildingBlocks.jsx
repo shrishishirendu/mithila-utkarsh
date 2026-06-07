@@ -1,10 +1,14 @@
 import { ArrowRight, BellRing } from "lucide-react";
 import { BorderPattern } from "./Motifs.jsx";
+import { devanagariToTirhuta } from "../data/tirhuta.js";
 
 // ============================================================
 // PageHero — top hero for every page
 // ============================================================
 export function PageHero({ eyebrow, title, titleAccent, tirhuta, devanagari, description, phase, accentColor = "var(--vermillion)", children }) {
+  // Tirhuta is auto-generated from the Devanagari phrase (always complete + correct),
+  // falling back to an explicit `tirhuta` prop only when no Devanagari is supplied.
+  const tir = devanagari ? devanagariToTirhuta(devanagari) : tirhuta;
   return (
     <section className="px-6 lg:px-10 pt-8 pb-8 max-w-5xl mx-auto relative">
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -24,11 +28,11 @@ export function PageHero({ eyebrow, title, titleAccent, tirhuta, devanagari, des
               </>
             )}
           </h1>
-          {tirhuta && (
+          {tir && (
             <div className="mt-3 font-tirhuta text-2xl sm:text-3xl"
                  style={{ color: "var(--vermillion-dark)" }}
                  title="Tirhuta">
-              {tirhuta}
+              {tir}
             </div>
           )}
           {devanagari && (

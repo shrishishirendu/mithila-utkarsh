@@ -5,7 +5,6 @@ import { useAuth } from "../lib/AuthContext.jsx";
 import { supabase } from "../lib/supabase.js";
 import { PageHero } from "../components/PageBuildingBlocks.jsx";
 import { BorderPattern } from "../components/Motifs.jsx";
-import { devanagariToTirhuta } from "../data/tirhuta.js";
 
 function initials(name) {
   return (name || "")
@@ -58,7 +57,6 @@ export default function MembersPage() {
       <PageHero
         eyebrow="Community · Phase 1B"
         title="Member Directory"
-        tirhuta={devanagariToTirhuta("सदस्य")}
         devanagari="मिथिला परिवार"
         description="Find other Maithils — at home and across the diaspora. Only members who choose to be listed appear here, and only signed-in members can browse."
       />

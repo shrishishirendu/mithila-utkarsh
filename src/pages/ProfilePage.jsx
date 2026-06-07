@@ -143,7 +143,6 @@ export default function ProfilePage() {
       <PageHero
         eyebrow="Your account"
         title="Profile"
-        tirhuta="𑒁𑒣𑒢"
         devanagari="अपन परिचय"
         description="Tell the community a little about yourself. Your name and city help other Maithils know who else is around."
       />

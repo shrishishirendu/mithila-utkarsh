@@ -35,7 +35,6 @@ export default function DictionaryPage() {
       <PageHero
         eyebrow="Word by word, phrase by phrase"
         title={<>The starter <span className="italic" style={{ color: "var(--vermillion)" }}>Maithili</span> dictionary.</>}
-        tirhuta="𑒧𑒻𑒟𑒱𑒪𑒲 𑒬𑒥𑓂𑒠𑒏𑒼𑒭"
         devanagari="मैथिली शब्दकोश"
         description={
           <>
