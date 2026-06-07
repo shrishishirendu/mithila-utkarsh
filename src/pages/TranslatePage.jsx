@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
-import { ArrowRightLeft, Copy, Check, Info, BookText, AlertTriangle, Sparkles, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRightLeft, Copy, Check, Info, BookText, AlertTriangle, Sparkles, Loader2, LogIn } from "lucide-react";
 import { BorderPattern } from "../components/Motifs.jsx";
+import { useAuth } from "../lib/AuthContext.jsx";
 import { devanagariToTirhuta } from "../data/tirhuta.js";
 import { translateToMaithili, PHRASES, PHRASE_CATEGORIES } from "../data/phrasebook.js";
 
 const EXAMPLES = ["thank you", "how are you?", "I am from Mithila", "mother", "water", "let's go"];
 
 export default function TranslatePage() {
+  const { user } = useAuth();
   const [input, setInput] = useState("thank you");
   const [ai, setAi] = useState(null);          // { devanagari, iast, confidence, note }
   const [aiLoading, setAiLoading] = useState(false);
@@ -21,7 +24,7 @@ export default function TranslatePage() {
 
   async function aiTranslate() {
     const text = input.trim();
-    if (!text) return;
+    if (!text || !user) return;
     setAiLoading(true);
     setAiError(null);
     setAi(null);
@@ -93,17 +96,33 @@ export default function TranslatePage() {
 
         {/* AI fallback — only when the curated lookup has no clean hit */}
         {canAiTranslate && !ai && (
-          <div className="mt-3 flex items-center gap-3 flex-wrap">
-            <button onClick={aiTranslate} disabled={aiLoading}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-opacity disabled:opacity-60"
-                    style={{ background: "var(--indigo)", color: "var(--paper)" }}>
-              {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              {aiLoading ? "Translating…" : "Translate with AI"}
-            </button>
-            <span className="text-[11px]" style={{ opacity: 0.55 }}>
-              AI handles full sentences — result is unverified.
-            </span>
-          </div>
+          user ? (
+            <div className="mt-3 flex items-center gap-3 flex-wrap">
+              <button onClick={aiTranslate} disabled={aiLoading}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-opacity disabled:opacity-60"
+                      style={{ background: "var(--indigo)", color: "var(--paper)" }}>
+                {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {aiLoading ? "Translating…" : "Translate with AI"}
+              </button>
+              <span className="text-[11px]" style={{ opacity: 0.55 }}>
+                AI handles full sentences — result is unverified.
+              </span>
+            </div>
+          ) : (
+            <div className="mt-3 rounded-2xl p-4 flex flex-wrap items-center gap-3"
+                 style={{ background: "var(--cream-2)" }}>
+              <Sparkles className="w-4 h-4 shrink-0" style={{ color: "var(--indigo)" }} />
+              <span className="text-sm flex-1 min-w-0" style={{ opacity: 0.8 }}>
+                <span className="font-semibold" style={{ color: "var(--indigo)" }}>AI translation is for members.</span>{" "}
+                Sign in to translate full sentences with AI.
+              </span>
+              <Link to="/signin" state={{ from: "/translate" }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold shrink-0"
+                    style={{ background: "var(--ink)", color: "var(--paper)" }}>
+                <LogIn className="w-4 h-4" /> Sign in
+              </Link>
+            </div>
+          )
         )}
 
         {aiError && (
