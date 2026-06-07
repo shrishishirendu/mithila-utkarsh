@@ -11,6 +11,7 @@ import PanchangPage from "./pages/PanchangPage.jsx";
 import GhatkaitiPage from "./pages/GhatkaitiPage.jsx";
 import MerchandisePage from "./pages/MerchandisePage.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
+import MembersPage from "./pages/MembersPage.jsx";
 import SignInPage from "./pages/SignInPage.jsx";
 import SignUpPage from "./pages/SignUpPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
       { path: "ghatkaiti",          element: <GhatkaitiPage /> },
       { path: "shop",               element: <MerchandisePage /> },
       { path: "membership",         element: <MembershipPage /> },
+      { path: "members",            element: <MembersPage /> },
       { path: "signin",             element: <SignInPage /> },
       { path: "signup",             element: <SignUpPage /> },
       { path: "profile",            element: <ProfilePage /> },

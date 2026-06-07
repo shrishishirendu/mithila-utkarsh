@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { User, MapPin, FileText, Loader2, CheckCircle2, LogOut } from "lucide-react";
+import { User, MapPin, FileText, Loader2, CheckCircle2, LogOut, Home, Briefcase, Users } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import { supabase } from "../lib/supabase.js";
 import { PageHero } from "../components/PageBuildingBlocks.jsx";
@@ -60,6 +60,9 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState("");
   const [city, setCity] = useState("");
   const [bio, setBio] = useState("");
+  const [nativePlace, setNativePlace] = useState("");
+  const [profession, setProfession] = useState("");
+  const [listed, setListed] = useState(false);
 
   // Load the user's profile from Supabase
   useEffect(() => {
@@ -70,7 +73,7 @@ export default function ProfilePage() {
       setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("display_name, city, bio")
+        .select("display_name, city, bio, native_place, profession, listed")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -82,6 +85,9 @@ export default function ProfilePage() {
         setDisplayName(data.display_name || "");
         setCity(data.city || "");
         setBio(data.bio || "");
+        setNativePlace(data.native_place || "");
+        setProfession(data.profession || "");
+        setListed(!!data.listed);
       }
       setLoading(false);
     })();
@@ -114,6 +120,9 @@ export default function ProfilePage() {
         display_name: displayName.trim() || null,
         city: city || null,
         bio: bio.trim() || null,
+        native_place: nativePlace.trim() || null,
+        profession: profession.trim() || null,
+        listed,
         updated_at: new Date().toISOString(),
       });
 
@@ -175,6 +184,44 @@ export default function ProfilePage() {
                 placeholder="A line or two about yourself — what you do, what you love about Mithila"
                 maxLength={280}
               />
+
+              <Field
+                icon={Home}
+                label="Native place in Mithila (optional)"
+                value={nativePlace}
+                onChange={setNativePlace}
+                placeholder="Your मूल / village / town — e.g. Sourath, Madhubani"
+              />
+
+              <Field
+                icon={Briefcase}
+                label="Profession (optional)"
+                value={profession}
+                onChange={setProfession}
+                placeholder="What you do — e.g. Software engineer, Teacher"
+              />
+
+              {/* Member Directory opt-in */}
+              <div className="rounded-2xl p-4" style={{ background: "var(--cream)", border: "1px solid var(--cream-2)" }}>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={listed}
+                    onChange={(e) => setListed(e.target.checked)}
+                    className="mt-1 w-4 h-4"
+                    style={{ accentColor: "var(--vermillion)" }}
+                  />
+                  <span>
+                    <span className="font-display text-base flex items-center gap-1.5">
+                      <Users className="w-4 h-4" style={{ color: "var(--indigo)" }} /> List me in the Member Directory
+                    </span>
+                    <span className="block text-[12px] mt-1" style={{ opacity: 0.65 }}>
+                      Off by default. When on, signed-in members can find you in the directory by your
+                      name, city, native place, profession and bio. Only signed-in members can browse it.
+                    </span>
+                  </span>
+                </label>
+              </div>
 
               {error && (
                 <div className="rounded-xl px-4 py-3 text-sm"
