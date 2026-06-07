@@ -17,11 +17,37 @@ Env:
 from http.server import BaseHTTPRequestHandler
 import json
 import os
+import urllib.request
 
 import anthropic
 
 MODEL = os.environ.get("TRANSLATE_MODEL", "claude-opus-4-8")
 MAX_INPUT_CHARS = 200  # cheap guard against abuse / runaway cost per call
+
+# Optional server-side auth. When SUPABASE_URL + SUPABASE_ANON_KEY are set, the
+# endpoint requires a valid Supabase session token (a real gate, not just the UI
+# button). When unset, it falls back to the UI sign-in gate — so pushing this does
+# not break anything before the env vars are configured.
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY")
+
+
+def verify_user(auth_header):
+    """True = valid session · False = invalid/missing · None = auth not configured."""
+    if not (SUPABASE_URL and SUPABASE_ANON_KEY):
+        return None
+    if not auth_header or not auth_header.lower().startswith("bearer "):
+        return False
+    token = auth_header.split(" ", 1)[1].strip()
+    req = urllib.request.Request(
+        f"{SUPABASE_URL}/auth/v1/user",
+        headers={"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {token}"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            return resp.status == 200
+    except Exception:
+        return False
 
 # --- Verified Maithili grounding (stable -> cached as a prompt prefix) ----------
 # Distinctively-Maithili vocabulary + phrases that anchor the model and keep it
@@ -133,6 +159,9 @@ class handler(BaseHTTPRequestHandler):
             if len(text) > MAX_INPUT_CHARS:
                 self._send(400, {"error": f"Text too long (max {MAX_INPUT_CHARS} characters)."})
                 return
+            if verify_user(self.headers.get("Authorization")) is False:
+                self._send(401, {"error": "Please sign in to use AI translation."})
+                return
             if not os.environ.get("ANTHROPIC_API_KEY"):
                 self._send(503, {"error": "AI translation isn't configured yet (no API key)."})
                 return
@@ -157,7 +186,7 @@ class handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
         if obj is not None:

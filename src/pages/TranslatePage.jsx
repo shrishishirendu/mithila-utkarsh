@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRightLeft, Copy, Check, Info, BookText, AlertTriangle, Sparkles, Loader2, LogIn } from "lucide-react";
 import { BorderPattern } from "../components/Motifs.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
+import { supabase } from "../lib/supabase.js";
 import { devanagariToTirhuta } from "../data/tirhuta.js";
 import { translateToMaithili, PHRASES, PHRASE_CATEGORIES } from "../data/phrasebook.js";
 
@@ -29,9 +30,12 @@ export default function TranslatePage() {
     setAiError(null);
     setAi(null);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers = { "Content-Type": "application/json" };
+      if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
       const r = await fetch("/api/translate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ text }),
       });
       const j = await r.json();
