@@ -31,6 +31,8 @@ export default function SignUpPage() {
       const m = (error.message || "").toLowerCase();
       if (m.includes("already registered") || m.includes("already exists") || error.status === 422) {
         setError("__already__");
+      } else if (m.includes("rate limit") || m.includes("too many")) {
+        setError("Too many emails were just sent. Please wait a minute or two, then try again.");
       } else {
         setError(error.message || "Could not create account.");
       }

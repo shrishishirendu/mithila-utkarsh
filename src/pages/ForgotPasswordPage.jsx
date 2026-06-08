@@ -21,7 +21,12 @@ export default function ForgotPasswordPage() {
     const { error } = await requestPasswordReset({ email });
     setLoading(false);
     if (error) {
-      setError(error.message || "Could not send the reset link. Please try again.");
+      const m = (error.message || "").toLowerCase();
+      if (m.includes("rate limit") || m.includes("too many")) {
+        setError("Too many emails were just sent. Please wait a minute or two, then try again.");
+      } else {
+        setError(error.message || "Could not send the reset link. Please try again.");
+      }
       return;
     }
     // Supabase returns success even if the email isn't registered (anti-enumeration),
