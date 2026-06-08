@@ -21,6 +21,7 @@ const NAV_ITEMS = [
   { id: "shop",          label: "Shopping",           path: "/shop",       icon: ShoppingBag,    eyebrow: "Bazar-Haat" },
   { id: "literature",    label: "Literature",         path: "/literature", icon: ScrollText,     eyebrow: "Sahitya" },
   { id: "arts",          label: "Arts & Culture",     path: "/arts",       icon: Palette,        eyebrow: "Kala evam Sanskriti" },
+  { id: "membership",    label: "Membership",         path: "/membership", icon: UserCircle,     eyebrow: "Sadasyata" },
 ];
 
 // ============================================================
