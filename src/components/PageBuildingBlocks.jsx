@@ -19,25 +19,33 @@ export function PageHero({ eyebrow, title, titleAccent, tirhuta, devanagari, des
               {eyebrow}
             </div>
           )}
-          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[0.95] tracking-tight">
-            {title}
-            {titleAccent && (
-              <>
-                <br />
-                <span className="italic" style={{ color: accentColor }}>{titleAccent}</span>
-              </>
-            )}
-          </h1>
-          {tir && (
-            <div className="mt-3 font-tirhuta text-2xl sm:text-3xl"
-                 style={{ color: "var(--vermillion-dark)" }}
-                 title="Tirhuta">
-              {tir}
-            </div>
+          {tir ? (
+            <>
+              {/* Primary — Mithilakshar (Tirhuta) */}
+              <h1 className="font-tirhuta text-4xl sm:text-5xl md:text-6xl leading-[1.05] tracking-tight"
+                  style={{ color: "var(--vermillion-dark)" }} title="Mithilakshar (Tirhuta)">
+                {tir}
+              </h1>
+              {/* Secondary — English */}
+              <div className="font-display text-2xl sm:text-3xl mt-2 leading-tight">
+                {title}
+                {titleAccent && <span className="italic" style={{ color: accentColor }}> {titleAccent}</span>}
+              </div>
+            </>
+          ) : (
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[0.95] tracking-tight">
+              {title}
+              {titleAccent && (
+                <>
+                  <br />
+                  <span className="italic" style={{ color: accentColor }}>{titleAccent}</span>
+                </>
+              )}
+            </h1>
           )}
+          {/* Tertiary — Devanagari */}
           {devanagari && (
-            <div className="mt-1 text-lg"
-                 style={{ color: "var(--ink)", opacity: 0.6 }}>
+            <div className="mt-1.5 text-base sm:text-lg" style={{ color: "var(--ink)", opacity: 0.55 }}>
               {devanagari}
             </div>
           )}

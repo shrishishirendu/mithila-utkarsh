@@ -18,6 +18,8 @@ import SignUpPage from "./pages/SignUpPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import AdminWordsPage from "./pages/AdminWordsPage.jsx";
+import LiteraturePage from "./pages/LiteraturePage.jsx";
+import ArtsPage from "./pages/ArtsPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -34,6 +36,8 @@ const router = createBrowserRouter([
       { path: "panchang",           element: <PanchangPage /> },
       { path: "ghatkaiti",          element: <GhatkaitiPage /> },
       { path: "shop",               element: <MerchandisePage /> },
+      { path: "literature",         element: <LiteraturePage /> },
+      { path: "arts",               element: <ArtsPage /> },
       { path: "membership",         element: <MembershipPage /> },
       { path: "members",            element: <MembersPage /> },
       { path: "signin",             element: <SignInPage /> },

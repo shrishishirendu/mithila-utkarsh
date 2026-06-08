@@ -1,24 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Home, BookOpen, BookA, CalendarHeart, Heart, ShoppingBag, UserCircle,
-  Menu, X, Trophy, LogIn, LogOut, User, Sun, Languages, ArrowRightLeft, Users
+  Menu, X, LogIn, LogOut, User, Sun, Languages, ArrowRightLeft, Users, ScrollText, Palette
 } from "lucide-react";
 import { BorderPattern } from "./Motifs.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
 
+// Menu labels are English; the Maithili name rides along as a small eyebrow.
+// (The right-hand page hero carries all three scripts: Tirhuta · English · Devanagari.)
 const NAV_ITEMS = [
-  { id: "home",         label: "Home",          path: "/",            icon: Home,          eyebrow: "Welcome" },
-  { id: "mithilakshar", label: "Mithilakshar",  path: "/learn",       icon: BookOpen,      eyebrow: "Learn the script" },
-  { id: "transliterate", label: "Transliterate", path: "/tirhuta",    icon: Languages,     eyebrow: "Devanagari → Tirhuta" },
-  { id: "dictionary",   label: "Dictionary",    path: "/dictionary",  icon: BookA,         eyebrow: "Word by word" },
-  { id: "translate",    label: "Translate",     path: "/translate",   icon: ArrowRightLeft, eyebrow: "English → Maithili" },
-  { id: "festivals",    label: "Pavain & Tyohar", path: "/festivals", icon: CalendarHeart, eyebrow: "Festivals" },
-  { id: "panchang",     label: "Panchang",      path: "/panchang",    icon: Sun,           eyebrow: "Daily calendar" },
-  { id: "ghatkaiti",    label: "Ghatkaiti",     path: "/ghatkaiti",   icon: Heart,         eyebrow: "Matrimony" },
-  { id: "merchandise",  label: "Merchandise",   path: "/shop",        icon: ShoppingBag,   eyebrow: "Wear the heritage" },
-  { id: "members",      label: "Members",       path: "/members",     icon: Users,         eyebrow: "Member directory" },
-  { id: "membership",   label: "Membership",    path: "/membership",  icon: UserCircle,    eyebrow: "Become a member" },
+  { id: "home",          label: "Home",               path: "/",           icon: Home,           eyebrow: "Ghar" },
+  { id: "mithilakshar",  label: "Learn Mithilakshar", path: "/learn",      icon: BookOpen,       eyebrow: "Sikhu Mithilakshar" },
+  { id: "dictionary",    label: "Dictionary",         path: "/dictionary", icon: BookA,          eyebrow: "Shabdkosh" },
+  { id: "translate",     label: "Translation",        path: "/translate",  icon: ArrowRightLeft, eyebrow: "Anuvaadak" },
+  { id: "transliterate", label: "Transliteration",    path: "/tirhuta",    icon: Languages,      eyebrow: "Lipi Pravartak" },
+  { id: "festivals",     label: "Festivals",          path: "/festivals",  icon: CalendarHeart,  eyebrow: "Pabain" },
+  { id: "panchang",      label: "Panchang",           path: "/panchang",   icon: Sun,            eyebrow: "Panchang" },
+  { id: "ghatkaiti",     label: "Matrimony",          path: "/ghatkaiti",  icon: Heart,          eyebrow: "Ghatkaiti" },
+  { id: "shop",          label: "Shopping",           path: "/shop",       icon: ShoppingBag,    eyebrow: "Bazar-Haat" },
+  { id: "literature",    label: "Literature",         path: "/literature", icon: ScrollText,     eyebrow: "Sahitya" },
+  { id: "arts",          label: "Arts & Culture",     path: "/arts",       icon: Palette,        eyebrow: "Kala evam Sanskriti" },
 ];
 
 // ============================================================
@@ -55,8 +57,8 @@ function SidebarContent({ onNavigate, learnedCount, totalCount }) {
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           return (
+            <Fragment key={item.id}>
             <NavLink
-              key={item.id}
               to={item.path}
               end={item.path === "/"}
               onClick={onNavigate}
@@ -99,31 +101,25 @@ function SidebarContent({ onNavigate, learnedCount, totalCount }) {
                 </>
               )}
             </NavLink>
+
+            {/* Compact Mithilakshar progress — sits right under the Learn item */}
+            {item.id === "mithilakshar" && (
+              <div className="ml-12 mr-3 mb-1.5 mt-0.5">
+                <div className="flex items-center justify-between text-[9px] tracking-wide uppercase"
+                     style={{ opacity: 0.55 }}>
+                  <span>{learnedCount}/{totalCount} learned</span>
+                  <span>{pct}%</span>
+                </div>
+                <div className="h-1 rounded-full mt-1 overflow-hidden" style={{ background: "var(--cream-2)" }}>
+                  <div className="h-full transition-all duration-500"
+                       style={{ width: `${pct}%`, background: "linear-gradient(90deg, var(--turmeric), var(--vermillion))" }} />
+                </div>
+              </div>
+            )}
+            </Fragment>
           );
         })}
       </nav>
-
-      {/* Progress footer */}
-      <div className="px-5 py-4 m-3 rounded-2xl"
-           style={{ background: "var(--cream-2)" }}>
-        <div className="flex items-center gap-2 mb-2">
-          <Trophy className="w-3.5 h-3.5" style={{ color: "var(--turmeric)" }} />
-          <span className="text-[10px] tracking-[0.18em] uppercase font-semibold"
-                style={{ color: "var(--vermillion-dark)" }}>
-            Your progress
-          </span>
-        </div>
-        <div className="font-display text-2xl leading-none">
-          {learnedCount}<span className="opacity-40 text-base">/{totalCount}</span>
-        </div>
-        <div className="text-[11px] mt-0.5" style={{ opacity: 0.6 }}>
-          {pct}% of Mithilakshar
-        </div>
-        <div className="h-1.5 rounded-full mt-2 overflow-hidden" style={{ background: "var(--paper)" }}>
-          <div className="h-full transition-all duration-500"
-               style={{ width: `${pct}%`, background: "linear-gradient(90deg, var(--turmeric), var(--vermillion))" }}/>
-        </div>
-      </div>
 
       <AuthWidget />
 
