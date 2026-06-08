@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRightLeft, Copy, Check, Info, BookText, AlertTriangle, Sparkles, Loader2, LogIn } from "lucide-react";
 import { BorderPattern } from "../components/Motifs.jsx";
+import { PageHero } from "../components/PageBuildingBlocks.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
 import { supabase } from "../lib/supabase.js";
 import { devanagariToTirhuta } from "../data/tirhuta.js";
@@ -67,23 +68,13 @@ export default function TranslatePage() {
 
   return (
     <div className="font-body min-h-screen" style={{ color: "var(--ink)" }}>
-      {/* Hero */}
-      <section className="px-6 lg:px-10 pt-8 pb-6 max-w-4xl mx-auto">
-        <div className="mb-2 inline-flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase font-semibold"
-             style={{ color: "var(--indigo)" }}>
-          <ArrowRightLeft className="w-3.5 h-3.5" /> English → Maithili
-        </div>
-        <h1 className="font-display text-4xl sm:text-5xl leading-[0.95] tracking-tight">
-          Translate into <span className="italic" style={{ color: "var(--indigo)" }}>Maithili.</span>
-        </h1>
-        <p className="mt-4 max-w-xl text-[15px] leading-relaxed" style={{ opacity: 0.75 }}>
-          Type English and get Maithili in both scripts — Devanagari and Tirhuta — plus pronunciation.
-          A dictionary &amp; phrasebook lookup: every result is human-curated, no AI guessing.
-        </p>
-        <div className="mt-6" style={{ color: "var(--indigo)", opacity: 0.5 }}>
-          <BorderPattern />
-        </div>
-      </section>
+      <PageHero
+        eyebrow="English → Maithili"
+        title="Translation"
+        devanagari="अनुवादक"
+        accentColor="var(--indigo)"
+        description="Type English and get Maithili in both scripts — Devanagari and Tirhuta — plus pronunciation. A dictionary & phrasebook lookup; AI for full sentences."
+      />
 
       {/* Translate box */}
       <section className="px-6 lg:px-10 max-w-4xl mx-auto">

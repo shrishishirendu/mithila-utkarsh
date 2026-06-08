@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { FESTIVALS, getNextFestival } from "../data/festivals.js";
 import { BorderPattern, LotusMotif, FishMotif } from "../components/Motifs.jsx";
+import { PageHero } from "../components/PageBuildingBlocks.jsx";
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -33,28 +34,13 @@ export default function FestivalsPage() {
 
   return (
     <div className="font-body min-h-screen" style={{ color: "var(--ink)" }}>
-      {/* HERO */}
-      <section className="px-6 lg:px-10 pt-8 pb-6 max-w-5xl mx-auto relative">
-        <div className="absolute right-2 top-2 hidden md:block opacity-15" style={{ color: "var(--turmeric)" }}>
-          <LotusMotif className="w-44" />
-        </div>
-        <div className="text-xs tracking-[0.2em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
-          Pavain · Tyohar
-        </div>
-        <h1 className="font-display text-5xl sm:text-6xl md:text-7xl leading-[0.95] tracking-tight">
-          The festivals <br />
-          <span className="italic" style={{ color: "var(--turmeric)" }}>of a Mithil year.</span>
-        </h1>
-        <p className="mt-4 max-w-xl text-[15px] leading-relaxed" style={{ opacity: 0.78 }}>
-          Thirteen festivals that shape the year in Mithila — from Jur Sital in spring
-          to Vivaha Panchami in early winter. Tap any to learn its rituals, foods,
-          and songs, and why it matters in our tradition.
-        </p>
-
-        <div className="mt-6" style={{ color: "var(--turmeric)", opacity: 0.5 }}>
-          <BorderPattern />
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Pavain · Tyohar"
+        title="Festivals"
+        devanagari="पाबनि"
+        accentColor="var(--turmeric)"
+        description="The festivals that shape the year in Mithila — from Jur Sital in spring to Vivaha Panchami in early winter. Tap any to learn its rituals, foods, songs, and why it matters."
+      />
 
       {/* NEXT FESTIVAL HIGHLIGHT */}
       {nextFest && (

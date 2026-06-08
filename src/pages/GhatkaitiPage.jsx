@@ -77,9 +77,8 @@ export default function GhatkaitiPage() {
     <div className="font-body min-h-screen pb-12" style={{ color: "var(--ink)" }}>
       <PageHero
         eyebrow="Matrimony · Phase 1C"
-        title="Ghatkaiti"
-        titleAccent="matrimony."
-        devanagari="विवाह संबंध"
+        title="Matrimony"
+        devanagari="घटकैती"
         accentColor="var(--indigo)"
         description="The Maithil matchmaking tradition, brought to the diaspora. Share your biodata privately — only the Ghatkaiti admin reviews it and reaches out about suitable matches. Members never see each other's biodata."
       />

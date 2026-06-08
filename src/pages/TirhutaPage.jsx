@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Languages, Copy, Check, ArrowDown, Info } from "lucide-react";
 import { BorderPattern } from "../components/Motifs.jsx";
+import { PageHero } from "../components/PageBuildingBlocks.jsx";
 import { transliterate } from "../data/tirhuta.js";
 
 const EXAMPLES = {
@@ -34,23 +35,13 @@ export default function TirhutaPage() {
 
   return (
     <div className="font-body min-h-screen" style={{ color: "var(--ink)" }}>
-      {/* Hero */}
-      <section className="px-6 lg:px-10 pt-8 pb-6 max-w-4xl mx-auto">
-        <div className="mb-2 inline-flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase font-semibold"
-             style={{ color: "var(--indigo)" }}>
-          <Languages className="w-3.5 h-3.5" /> Mithilakshar · Tirhuta
-        </div>
-        <h1 className="font-display text-4xl sm:text-5xl leading-[0.95] tracking-tight">
-          Tirhuta <span className="italic" style={{ color: "var(--indigo)" }}>transliterator.</span>
-        </h1>
-        <p className="mt-4 max-w-xl text-[15px] leading-relaxed" style={{ opacity: 0.75 }}>
-          Convert Devanagari or phonetic English into the Tirhuta (Mithilakshar) script —
-          the script of the <span className="font-tirhuta">𑒧𑒱𑒟𑒱𑒪𑒰 𑒅𑒞𑓂𑒏𑒩𑓂𑒭</span> wordmark itself.
-        </p>
-        <div className="mt-6" style={{ color: "var(--indigo)", opacity: 0.5 }}>
-          <BorderPattern />
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Mithilakshar · Tirhuta"
+        title="Transliteration"
+        devanagari="लिपि प्रवर्तक"
+        accentColor="var(--indigo)"
+        description="Convert Devanagari or phonetic English into the Tirhuta (Mithilakshar) script — the script of the brand wordmark itself."
+      />
 
       {/* Mode toggle */}
       <section className="px-6 lg:px-10 pb-4 max-w-4xl mx-auto">

@@ -4,6 +4,7 @@ import {
   BookOpen, Target, PenLine, Undo2, Eraser
 } from "lucide-react";
 import { SunMotif, LotusMotif, FishMotif, BorderPattern } from "./components/Motifs.jsx";
+import { PageHero } from "./components/PageBuildingBlocks.jsx";
 
 // ============================================================
 // DATA — Tirhuta / Mithilakshar
@@ -414,23 +415,13 @@ export default function MithilaksharLearn() {
 
   return (
     <div className="font-body" style={{ color: "var(--ink)" }}>
-      {/* HERO */}
-      <section className="px-6 lg:px-10 pt-8 pb-8 max-w-5xl mx-auto relative">
-        <div className="absolute right-2 top-0 hidden md:block opacity-20" style={{ color: "var(--indigo)" }}>
-          <FishMotif className="w-40" />
-        </div>
-        <div className="text-xs tracking-[0.2em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
-          Tirhuta · Mithilakshar
-        </div>
-        <h1 className="font-display text-5xl sm:text-6xl md:text-7xl leading-[0.95] tracking-tight">
-          Learn the script <br />
-          <span style={{ color: "var(--vermillion)" }} className="italic">of Mithila.</span>
-        </h1>
-        <p className="mt-4 max-w-xl text-[15px] leading-relaxed" style={{ opacity: 0.75 }}>
-          Begin with vowels and consonants, learn how mātrās attach,
-          study common conjuncts, then practise writing each one yourself.
-        </p>
-
+      {/* HERO — 3-script (Mithilakshar primary, English, Devanagari) */}
+      <PageHero
+        eyebrow="Tirhuta · Mithilakshar"
+        title="Learn Mithilakshar"
+        devanagari="मिथिलाक्षर"
+        description="Begin with vowels and consonants, learn how mātrās attach, study common conjuncts, then practise writing each one yourself."
+      >
         <div className="mt-6 max-w-md">
           <div className="flex items-center justify-between text-xs mb-1.5" style={{ opacity: 0.7 }}>
             <span className="font-medium tracking-wide uppercase">Your progress</span>
@@ -441,7 +432,7 @@ export default function MithilaksharLearn() {
                  style={{ width: `${pct}%`, background: "linear-gradient(90deg, var(--turmeric), var(--vermillion))" }}/>
           </div>
         </div>
-      </section>
+      </PageHero>
 
       {/* MODE TOGGLE */}
       <div className="px-6 lg:px-10 max-w-5xl mx-auto">

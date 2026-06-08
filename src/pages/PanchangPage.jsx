@@ -8,6 +8,7 @@ import { NavadhikaraPanel } from "../components/NavadhikaraPanel.jsx";
 import { FestivalCalendar } from "../components/FestivalCalendar.jsx";
 import { metaForDate } from "../data/panchang-meta-908.js";
 import { festivalsForDate } from "../data/panchang-festivals.js";
+import { devanagariToTirhuta } from "../data/tirhuta.js";
 
 const CITIES = [
   { id: "sitamarhi", name: "Sitamarhi",  region: "Mithila",        lat: 26.59,  lon: 85.49,  tz: "Asia/Kolkata" },
@@ -161,12 +162,15 @@ function PanchangHero({ meta }) {
               मिथिला-दुहिता सीता
             </span>
           </div>
-          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[0.95] tracking-tight">
-            Mithila Duhita Panchang,
-            <br />
-            <span className="italic" style={{ color: "var(--indigo)" }}>calculated.</span>
+          {/* 3-script title — Mithilakshar primary, English, Devanagari */}
+          <h1 className="font-tirhuta text-4xl sm:text-5xl md:text-6xl leading-[1.05] tracking-tight"
+              style={{ color: "var(--vermillion-dark)" }} title="Mithilakshar (Tirhuta)">
+            {devanagariToTirhuta("पञ्चाङ्ग")}
           </h1>
-          <div className="mt-3 font-display text-2xl" style={{ color: "var(--vermillion-dark)" }}>
+          <div className="font-display text-2xl sm:text-3xl mt-2 leading-tight">
+            Panchang <span className="italic" style={{ color: "var(--indigo)" }}>· calculated.</span>
+          </div>
+          <div className="mt-1.5 text-base sm:text-lg" style={{ color: "var(--ink)", opacity: 0.55 }}>
             पञ्चाङ्ग
           </div>
           <p className="mt-4 max-w-xl text-[15px] leading-relaxed" style={{ opacity: 0.75 }}>
