@@ -1,58 +1,74 @@
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Mail, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import { AuthShell } from "../components/AuthShell.jsx";
 
-export default function SignInPage() {
-  const { signIn } = useAuth();
-  const navigate = useNavigate();
+export default function ForgotPasswordPage() {
+  const { requestPasswordReset } = useAuth();
   const location = useLocation();
-  const redirectTo = location.state?.from || "/profile";
   const prefillEmail = new URLSearchParams(location.search).get("email") || "";
 
   const [email, setEmail] = useState(prefillEmail);
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
   const [error, setError] = useState(null);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const { error } = await signIn({ email, password });
+    const { error } = await requestPasswordReset({ email });
     setLoading(false);
     if (error) {
-      setError(error.message || "Could not sign in. Check your email and password.");
+      setError(error.message || "Could not send the reset link. Please try again.");
       return;
     }
-    navigate(redirectTo, { replace: true });
+    // Supabase returns success even if the email isn't registered (anti-enumeration),
+    // so we always show the same neutral confirmation.
+    setSent(true);
+  }
+
+  if (sent) {
+    return (
+      <AuthShell
+        eyebrow="Reset link sent"
+        title="Check your email"
+        footer={
+          <Link to="/signin" className="font-semibold" style={{ color: "var(--vermillion)" }}>
+            Back to sign in
+          </Link>
+        }
+      >
+        <div className="text-center py-4">
+          <CheckCircle2 className="w-12 h-12 mx-auto mb-4" style={{ color: "var(--leaf)" }} />
+          <p className="text-sm leading-relaxed" style={{ opacity: 0.8 }}>
+            If <span className="font-semibold">{email}</span> is registered, a password-reset
+            link is on its way. Click it to choose a new password.
+          </p>
+          <p className="text-xs leading-relaxed mt-4" style={{ opacity: 0.6 }}>
+            From <span className="font-semibold">Mithila Utkarsh</span> — if it isn't in your inbox, check spam/junk.
+          </p>
+        </div>
+      </AuthShell>
+    );
   }
 
   return (
     <AuthShell
-      eyebrow="Welcome back"
-      title="Sign in"
-      tirhuta="𑒮𑒰𑒁𑒢 𑒂𑒢"
+      eyebrow="Forgot your password?"
+      title="Reset password"
       footer={
         <>
-          New here?{" "}
-          <Link to="/signup" className="font-semibold" style={{ color: "var(--vermillion)" }}>
-            Create an account
+          Remembered it?{" "}
+          <Link to="/signin" className="font-semibold" style={{ color: "var(--vermillion)" }}>
+            Sign in
           </Link>
         </>
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Field icon={Mail} label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" required />
-        <Field icon={Lock} label="Password" type="password" value={password} onChange={setPassword} autoComplete="current-password" required />
-
-        <div className="flex justify-end -mt-1">
-          <Link to={`/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ""}`}
-                className="text-xs font-medium" style={{ color: "var(--vermillion)" }}>
-            Forgot password?
-          </Link>
-        </div>
 
         {error && (
           <div className="rounded-xl px-4 py-3 text-sm"
@@ -68,8 +84,12 @@ export default function SignInPage() {
           style={{ background: "var(--ink)", color: "var(--paper)" }}
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
-          {loading ? "Signing in…" : "Sign in"}
+          {loading ? "Sending…" : "Send reset link"}
         </button>
+
+        <p className="text-xs leading-relaxed pt-2" style={{ opacity: 0.55 }}>
+          We'll email you a secure link to set a new password.
+        </p>
       </form>
     </AuthShell>
   );

@@ -56,6 +56,19 @@ export function AuthProvider({ children }) {
       const { error } = await supabase.auth.signOut();
       return { error };
     },
+    // Email the user a password-reset link that lands on /reset-password.
+    // (redirect target must be allow-listed in Supabase → Auth → Redirect URLs.)
+    requestPasswordReset: async ({ email }) => {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      return { data, error };
+    },
+    // Set a new password for the user in the active (recovery) session.
+    updatePassword: async ({ password }) => {
+      const { data, error } = await supabase.auth.updateUser({ password });
+      return { data, error };
+    },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
