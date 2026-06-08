@@ -21,8 +21,8 @@ const NAV_ITEMS = [
   { id: "shop",          label: "Shopping",           path: "/shop",       icon: ShoppingBag,    eyebrow: "Bazar-Haat" },
   { id: "literature",    label: "Literature",         path: "/literature", icon: ScrollText,     eyebrow: "Sahitya" },
   { id: "arts",          label: "Arts & Culture",     path: "/arts",       icon: Palette,        eyebrow: "Kala evam Sanskriti" },
-  { id: "membership",    label: "Membership",         path: "/membership", icon: UserCircle,     eyebrow: "Sadasyata" },
 ];
+// Membership lives off-menu now — surfaced via the global <MembershipPill /> on every page.
 
 // ============================================================
 // Sidebar Content (used by both desktop sidebar and mobile drawer)
@@ -251,7 +251,46 @@ export default function Layout() {
       <main className="flex-1 min-w-0">
         <Outlet />
       </main>
+
+      {/* --- Global membership CTA (every page, signed-out only) --- */}
+      <MembershipPill />
     </div>
+  );
+}
+
+// ============================================================
+//  MembershipPill — fixed bottom-right CTA shown on every page.
+//  Only for signed-out visitors; hidden where it would be redundant.
+// ============================================================
+function MembershipPill() {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  if (loading || user) return null;
+  const hideOn = ["/membership", "/signup", "/signin"];
+  if (hideOn.some((p) => location.pathname.startsWith(p))) return null;
+
+  return (
+    <Link
+      to="/membership"
+      aria-label="Become a member"
+      className="fixed bottom-4 right-4 z-40 inline-flex items-center gap-2.5 pl-4 pr-5 py-3 rounded-full transition-transform hover:-translate-y-0.5"
+      style={{
+        background: "var(--vermillion)",
+        color: "var(--paper)",
+        boxShadow: "0 8px 24px rgba(193,39,45,0.35)",
+      }}
+    >
+      <span className="w-7 h-7 rounded-full grid place-items-center shrink-0"
+            style={{ background: "rgba(255,255,255,0.18)" }}>
+        <Heart className="w-4 h-4" fill="currentColor" />
+      </span>
+      <span className="leading-tight text-left">
+        <span className="block font-display text-sm font-semibold">Become a Member</span>
+        <span className="block text-[10px] tracking-wider uppercase" style={{ opacity: 0.85 }}>
+          सदस्य बनू
+        </span>
+      </span>
+    </Link>
   );
 }
 
