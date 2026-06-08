@@ -28,12 +28,26 @@ export default function SignUpPage() {
     setLoading(false);
 
     if (error) {
-      setError(error.message || "Could not create account.");
+      const m = (error.message || "").toLowerCase();
+      if (m.includes("already registered") || m.includes("already exists") || error.status === 422) {
+        setError("__already__");
+      } else {
+        setError(error.message || "Could not create account.");
+      }
       return;
     }
 
-    // If Supabase requires email confirmation, no session is returned yet.
-    // If confirmation is disabled in Supabase settings, the user is signed in immediately.
+    // With email confirmation + enumeration protection ON (Supabase default),
+    // signing up with an existing email returns NO error and an empty
+    // `identities` array. Catch that and point the user at sign-in instead of
+    // falsely telling them to "check your email".
+    const identities = data?.user?.identities;
+    if (Array.isArray(identities) && identities.length === 0) {
+      setError("__already__");
+      return;
+    }
+
+    // If confirmation is disabled, a session comes back and the user is signed in.
     if (data?.session) {
       navigate("/profile", { replace: true });
     } else {
@@ -61,7 +75,7 @@ export default function SignUpPage() {
             We sent a confirmation link to <span className="font-semibold">{email}</span>. Click the link in the email to verify your account, then come back here to sign in.
           </p>
           <p className="text-xs leading-relaxed mt-4" style={{ opacity: 0.6 }}>
-            The email is from <code>noreply@mail.supabase.io</code> — check spam if you don't see it.
+            From <span className="font-semibold">Mithila Utkarsh</span> — if it isn't in your inbox, check spam/junk.
           </p>
         </div>
       </AuthShell>
@@ -89,7 +103,17 @@ export default function SignUpPage() {
         {error && (
           <div className="rounded-xl px-4 py-3 text-sm"
                style={{ background: "rgba(180, 58, 46, 0.08)", color: "var(--vermillion-dark)" }}>
-            {error}
+            {error === "__already__" ? (
+              <>
+                This email is already registered.{" "}
+                <Link to={`/signin?email=${encodeURIComponent(email)}`} className="font-semibold underline"
+                      style={{ color: "var(--vermillion)" }}>
+                  Sign in instead
+                </Link>.
+              </>
+            ) : (
+              error
+            )}
           </div>
         )}
 

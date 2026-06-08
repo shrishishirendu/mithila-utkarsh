@@ -9,8 +9,9 @@ export default function SignInPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const redirectTo = location.state?.from || "/profile";
+  const prefillEmail = new URLSearchParams(location.search).get("email") || "";
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(prefillEmail);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

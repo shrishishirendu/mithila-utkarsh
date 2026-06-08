@@ -36,7 +36,16 @@ export function AuthProvider({ children }) {
     user: session?.user ?? null,
     loading,
     signUp: async ({ email, password }) => {
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          // Send the confirmation link back to THIS origin's sign-in page,
+          // independent of the Supabase dashboard "Site URL" field.
+          // (Must be allow-listed in Supabase → Auth → Redirect URLs.)
+          emailRedirectTo: `${window.location.origin}/signin`,
+        },
+      });
       return { data, error };
     },
     signIn: async ({ email, password }) => {
