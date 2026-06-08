@@ -11,10 +11,14 @@ import { useAuth } from "../lib/AuthContext.jsx";
 // (The right-hand page hero carries all three scripts: Tirhuta · English · Devanagari.)
 const NAV_ITEMS = [
   { id: "home",          label: "Home",               path: "/",           icon: Home,           eyebrow: "Ghar" },
-  { id: "mithilakshar",  label: "Learn Mithilakshar", path: "/learn",      icon: BookOpen,       eyebrow: "Sikhu Mithilakshar" },
-  { id: "dictionary",    label: "Dictionary",         path: "/dictionary", icon: BookA,          eyebrow: "Shabdkosh" },
-  { id: "translate",     label: "Translation",        path: "/translate",  icon: ArrowRightLeft, eyebrow: "Anuvaadak" },
-  { id: "transliterate", label: "Transliteration",    path: "/tirhuta",    icon: Languages,      eyebrow: "Lipi Pravartak" },
+  { id: "mithilakshar",  label: "Learn Mithilakshar", path: "/learn",      icon: BookOpen,       eyebrow: "Sikhu Mithilakshar",
+    // Language & script tools nest under Mithilakshar (always visible, not collapsed)
+    children: [
+      { id: "dictionary",    label: "Dictionary",      path: "/dictionary", icon: BookA,          eyebrow: "Shabdkosh" },
+      { id: "translate",     label: "Translation",     path: "/translate",  icon: ArrowRightLeft, eyebrow: "Anuvaadak" },
+      { id: "transliterate", label: "Transliteration", path: "/tirhuta",    icon: Languages,      eyebrow: "Lipi Pravartak" },
+    ],
+  },
   { id: "festivals",     label: "Festivals",          path: "/festivals",  icon: CalendarHeart,  eyebrow: "Pabain" },
   { id: "panchang",      label: "Panchang",           path: "/panchang",   icon: Sun,            eyebrow: "Panchang" },
   { id: "ghatkaiti",     label: "Matrimony",          path: "/ghatkaiti",  icon: Heart,          eyebrow: "Ghatkaiti" },
@@ -23,6 +27,56 @@ const NAV_ITEMS = [
   { id: "arts",          label: "Arts & Culture",     path: "/arts",       icon: Palette,        eyebrow: "Kala evam Sanskriti" },
 ];
 // Membership lives off-menu now — surfaced via the global <MembershipPill /> on every page.
+
+// ============================================================
+// A single nav row — used for top-level items and nested children.
+// `compact` shrinks the icon/text for child rows.
+// ============================================================
+function NavItemRow({ item, onNavigate, compact }) {
+  const Icon = item.icon;
+  return (
+    <NavLink
+      to={item.path}
+      end={item.path === "/"}
+      onClick={onNavigate}
+      className={({ isActive }) =>
+        `flex items-start gap-3 px-3 ${compact ? "py-2" : "py-2.5"} my-0.5 rounded-xl transition-all ${
+          isActive ? "" : "hover:bg-white/30"
+        }`
+      }
+      style={({ isActive }) =>
+        isActive
+          ? { background: "var(--paper)", boxShadow: "inset 0 0 0 1px var(--cream-2)" }
+          : { color: "var(--ink)" }
+      }
+    >
+      {({ isActive }) => (
+        <>
+          <span
+            className={`${compact ? "w-7 h-7" : "w-9 h-9"} rounded-lg grid place-items-center shrink-0 mt-0.5`}
+            style={{
+              background: isActive ? "var(--vermillion)" : "var(--cream-2)",
+              color: isActive ? "var(--paper)" : "var(--ink)",
+            }}
+          >
+            <Icon className={compact ? "w-3.5 h-3.5" : "w-4 h-4"} />
+          </span>
+          <div className="leading-tight pt-0.5">
+            <div
+              className={`font-display ${compact ? "text-sm" : "text-base"} leading-tight`}
+              style={{ color: isActive ? "var(--vermillion-dark)" : "var(--ink)" }}
+            >
+              {item.label}
+            </div>
+            <div className="text-[10px] tracking-wider uppercase mt-0.5" style={{ opacity: 0.6 }}>
+              {item.eyebrow}
+            </div>
+          </div>
+        </>
+      )}
+    </NavLink>
+  );
+}
 
 // ============================================================
 // Sidebar Content (used by both desktop sidebar and mobile drawer)
@@ -55,53 +109,9 @@ function SidebarContent({ onNavigate, learnedCount, totalCount }) {
 
       {/* Nav */}
       <nav className="flex-1 px-3 overflow-y-auto">
-        {NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Fragment key={item.id}>
-            <NavLink
-              to={item.path}
-              end={item.path === "/"}
-              onClick={onNavigate}
-              className={({ isActive }) =>
-                `flex items-start gap-3 px-3 py-2.5 my-0.5 rounded-xl transition-all ${
-                  isActive ? "" : "hover:bg-white/30"
-                }`
-              }
-              style={({ isActive }) =>
-                isActive
-                  ? { background: "var(--paper)", boxShadow: "inset 0 0 0 1px var(--cream-2)" }
-                  : { color: "var(--ink)" }
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <span
-                    className="w-9 h-9 rounded-lg grid place-items-center shrink-0 mt-0.5"
-                    style={{
-                      background: isActive ? "var(--vermillion)" : "var(--cream-2)",
-                      color: isActive ? "var(--paper)" : "var(--ink)",
-                    }}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </span>
-                  <div className="leading-tight pt-0.5">
-                    <div
-                      className="font-display text-base leading-tight"
-                      style={{ color: isActive ? "var(--vermillion-dark)" : "var(--ink)" }}
-                    >
-                      {item.label}
-                    </div>
-                    <div
-                      className="text-[10px] tracking-wider uppercase mt-0.5"
-                      style={{ opacity: 0.6 }}
-                    >
-                      {item.eyebrow}
-                    </div>
-                  </div>
-                </>
-              )}
-            </NavLink>
+        {NAV_ITEMS.map((item) => (
+          <Fragment key={item.id}>
+            <NavItemRow item={item} onNavigate={onNavigate} />
 
             {/* Compact Mithilakshar progress — sits right under the Learn item */}
             {item.id === "mithilakshar" && (
@@ -117,9 +127,17 @@ function SidebarContent({ onNavigate, learnedCount, totalCount }) {
                 </div>
               </div>
             )}
-            </Fragment>
-          );
-        })}
+
+            {/* Nested language & script tools — always visible, with a guide line */}
+            {item.children && (
+              <div className="ml-5 pl-3 mb-1.5" style={{ borderLeft: "1px solid var(--cream-2)" }}>
+                {item.children.map((child) => (
+                  <NavItemRow key={child.id} item={child} onNavigate={onNavigate} compact />
+                ))}
+              </div>
+            )}
+          </Fragment>
+        ))}
       </nav>
 
       <AuthWidget />
@@ -174,7 +192,8 @@ export default function Layout() {
     return () => { document.body.style.overflow = ""; };
   }, [drawerOpen]);
 
-  const currentPage = NAV_ITEMS.find((n) =>
+  const flatNav = NAV_ITEMS.flatMap((n) => (n.children ? [...n.children, n] : [n]));
+  const currentPage = flatNav.find((n) =>
     n.path === "/" ? location.pathname === "/" : location.pathname.startsWith(n.path)
   );
 
