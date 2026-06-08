@@ -37,7 +37,7 @@ export default function FestivalsPage() {
       <PageHero
         eyebrow="Pavain · Tyohar"
         title="Festivals"
-        devanagari="पाबनि"
+        devanagari="पाबैन"
         accentColor="var(--turmeric)"
         description="The festivals that shape the year in Mithila — from Jur Sital in spring to Vivaha Panchami in early winter. Tap any to learn its rituals, foods, songs, and why it matters."
       />

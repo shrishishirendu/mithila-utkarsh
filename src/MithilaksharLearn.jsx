@@ -418,7 +418,7 @@ export default function MithilaksharLearn() {
       {/* HERO — 3-script (Mithilakshar primary, English, Devanagari) */}
       <PageHero
         eyebrow="Tirhuta · Mithilakshar"
-        title="Learn Mithilakshar"
+        title="Mithilakshar"
         devanagari="मिथिलाक्षर"
         description="Begin with vowels and consonants, learn how mātrās attach, study common conjuncts, then practise writing each one yourself."
       >
