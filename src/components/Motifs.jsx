@@ -71,42 +71,6 @@ export const PeacockMotif = ({ className = "" }) => (
   </svg>
 );
 
-// Paag — the Maithil ceremonial turban, with its distinctive jutting front peak.
-export const PaagMotif = ({ className = "" }) => (
-  <svg viewBox="0 0 84 60" className={className} fill="none">
-    {/* silhouette: a flared base, the back sweeping over to a sharp forward peak */}
-    <path d="M12 50 Q7 28 24 20 Q38 13 48 17 L64 3 Q67 11 58 22 Q74 32 72 50"
-          stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-    {/* flared base resting line */}
-    <path d="M12 50 Q42 58 72 50" stroke="currentColor" strokeWidth="1.5" />
-    {/* wrap folds following the crown */}
-    <path d="M22 48 Q24 32 42 22" stroke="currentColor" strokeWidth="1" />
-    <path d="M34 49 Q40 32 52 22" stroke="currentColor" strokeWidth="1" />
-    <path d="M46 49 Q54 34 60 26" stroke="currentColor" strokeWidth="1" />
-    {/* ornament at the peak's base */}
-    <circle cx="52" cy="18" r="1.8" fill="currentColor" />
-  </svg>
-);
-
-// Joṛā maachh — the auspicious double-fish, a mirrored pair facing each other.
-export const JoraMaachhMotif = ({ className = "" }) => {
-  const Fish = (
-    <>
-      <path d="M4 22 Q19 8 49 22 Q19 36 4 22 Z" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M49 22 L67 11 L67 33 Z" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="18" cy="22" r="1.8" fill="currentColor" />
-      <path d="M24 17 Q29 22 24 27" stroke="currentColor" strokeWidth="1" />
-      <path d="M31 15 Q36 22 31 29" stroke="currentColor" strokeWidth="1" />
-    </>
-  );
-  return (
-    <svg viewBox="0 0 150 44" className={className} fill="none">
-      <g transform="translate(72,0) scale(-1,1)">{Fish}</g>
-      <g transform="translate(74,0)">{Fish}</g>
-    </svg>
-  );
-};
-
 export const BorderPattern = () => (
   <svg viewBox="0 0 400 16" preserveAspectRatio="none" className="w-full h-4">
     <pattern id="tri-mcsa" x="0" y="0" width="20" height="16" patternUnits="userSpaceOnUse">
