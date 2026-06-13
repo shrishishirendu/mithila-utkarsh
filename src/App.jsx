@@ -22,6 +22,8 @@ import NotFoundPage from "./pages/NotFoundPage.jsx";
 import AdminWordsPage from "./pages/AdminWordsPage.jsx";
 import LiteraturePage from "./pages/LiteraturePage.jsx";
 import ArtsPage from "./pages/ArtsPage.jsx";
+import BlogPage from "./pages/BlogPage.jsx";
+import BlogPostPage from "./pages/BlogPostPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +42,8 @@ const router = createBrowserRouter([
       { path: "shop",               element: <MerchandisePage /> },
       { path: "literature",         element: <LiteraturePage /> },
       { path: "arts",               element: <ArtsPage /> },
+      { path: "blog",               element: <BlogPage /> },
+      { path: "blog/:slug",         element: <BlogPostPage /> },
       { path: "membership",         element: <MembershipPage /> },
       { path: "members",            element: <MembersPage /> },
       { path: "signin",             element: <SignInPage /> },

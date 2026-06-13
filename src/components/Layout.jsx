@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Home, BookOpen, BookA, CalendarHeart, Heart, ShoppingBag, UserCircle,
-  Menu, X, LogIn, LogOut, User, Sun, Languages, ArrowRightLeft, Users, ScrollText, Palette
+  Menu, X, LogIn, LogOut, User, Sun, Languages, ArrowRightLeft, Users, ScrollText, Palette, Newspaper
 } from "lucide-react";
 import { BorderPattern } from "./Motifs.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
@@ -28,6 +28,7 @@ const NAV_ITEMS = [
   { id: "shop",          label: "Shopping",           path: "/shop",       icon: ShoppingBag,    eyebrow: "Bazar-Haat",         eyebrowDev: "बजार-हाट" },
   { id: "literature",    label: "Literature",         path: "/literature", icon: ScrollText,     eyebrow: "Sahitya",            eyebrowDev: "साहित्य" },
   { id: "arts",          label: "Arts & Culture",     path: "/arts",       icon: Palette,        eyebrow: "Kala evam Sanskriti", eyebrowDev: "कला एवं संस्कृति" },
+  { id: "blog",          label: "Blog",               path: "/blog",       icon: Newspaper,      eyebrow: "Lekh",                eyebrowDev: "लेख" },
 ];
 // Membership lives off-menu now — surfaced via the global <MembershipPill /> on every page.
 
