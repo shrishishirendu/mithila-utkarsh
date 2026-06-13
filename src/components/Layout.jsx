@@ -6,25 +6,28 @@ import {
 } from "lucide-react";
 import { BorderPattern } from "./Motifs.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
+import { devanagariToTirhuta } from "../data/tirhuta.js";
 
 // Menu labels are English; the Maithili name rides along as a small eyebrow.
 // (The right-hand page hero carries all three scripts: Tirhuta · English · Devanagari.)
+// eyebrow = roman Maithili (kept for the hover tooltip); eyebrowDev = Devanagari,
+// rendered in Tirhuta (Mithilakshar) under each menu label.
 const NAV_ITEMS = [
-  { id: "home",          label: "Home",               path: "/",           icon: Home,           eyebrow: "Ghar" },
-  { id: "mithilakshar",  label: "Learn Mithilakshar", path: "/learn",      icon: BookOpen,       eyebrow: "Sikhu Mithilakshar",
+  { id: "home",          label: "Home",               path: "/",           icon: Home,           eyebrow: "Dalan",              eyebrowDev: "दलान" },
+  { id: "mithilakshar",  label: "Learn Mithilakshar", path: "/learn",      icon: BookOpen,       eyebrow: "Sikhu Mithilakshar", eyebrowDev: "सिखू मिथिलाक्षर",
     // Language & script tools nest under Mithilakshar (always visible, not collapsed)
     children: [
-      { id: "dictionary",    label: "Dictionary",      path: "/dictionary", icon: BookA,          eyebrow: "Shabdkosh" },
-      { id: "translate",     label: "Translation",     path: "/translate",  icon: ArrowRightLeft, eyebrow: "Anuvaadak" },
-      { id: "transliterate", label: "Transliteration", path: "/tirhuta",    icon: Languages,      eyebrow: "Lipi Pravartak" },
+      { id: "dictionary",    label: "Dictionary",      path: "/dictionary", icon: BookA,          eyebrow: "Shabdkosh",      eyebrowDev: "शब्दकोश" },
+      { id: "translate",     label: "Translation",     path: "/translate",  icon: ArrowRightLeft, eyebrow: "Anuvaadak",      eyebrowDev: "अनुवादक" },
+      { id: "transliterate", label: "Transliteration", path: "/tirhuta",    icon: Languages,      eyebrow: "Lipi Pravartak", eyebrowDev: "लिपि प्रवर्तक" },
     ],
   },
-  { id: "festivals",     label: "Festivals",          path: "/festivals",  icon: CalendarHeart,  eyebrow: "Pabain" },
-  { id: "panchang",      label: "Panchang",           path: "/panchang",   icon: Sun,            eyebrow: "Panchang" },
-  { id: "ghatkaiti",     label: "Matrimony",          path: "/ghatkaiti",  icon: Heart,          eyebrow: "Ghatkaiti" },
-  { id: "shop",          label: "Shopping",           path: "/shop",       icon: ShoppingBag,    eyebrow: "Bazar-Haat" },
-  { id: "literature",    label: "Literature",         path: "/literature", icon: ScrollText,     eyebrow: "Sahitya" },
-  { id: "arts",          label: "Arts & Culture",     path: "/arts",       icon: Palette,        eyebrow: "Kala evam Sanskriti" },
+  { id: "festivals",     label: "Festivals",          path: "/festivals",  icon: CalendarHeart,  eyebrow: "Pabain",             eyebrowDev: "पाबैन" },
+  { id: "panchang",      label: "Panchang",           path: "/panchang",   icon: Sun,            eyebrow: "Panchang",           eyebrowDev: "पञ्चाङ्ग" },
+  { id: "ghatkaiti",     label: "Matrimony",          path: "/ghatkaiti",  icon: Heart,          eyebrow: "Ghatkaiti",          eyebrowDev: "घटकैती" },
+  { id: "shop",          label: "Shopping",           path: "/shop",       icon: ShoppingBag,    eyebrow: "Bazar-Haat",         eyebrowDev: "बजार-हाट" },
+  { id: "literature",    label: "Literature",         path: "/literature", icon: ScrollText,     eyebrow: "Sahitya",            eyebrowDev: "साहित्य" },
+  { id: "arts",          label: "Arts & Culture",     path: "/arts",       icon: Palette,        eyebrow: "Kala evam Sanskriti", eyebrowDev: "कला एवं संस्कृति" },
 ];
 // Membership lives off-menu now — surfaced via the global <MembershipPill /> on every page.
 
@@ -68,8 +71,9 @@ function NavItemRow({ item, onNavigate, compact }) {
             >
               {item.label}
             </div>
-            <div className="text-[10px] tracking-wider uppercase mt-0.5" style={{ opacity: 0.6 }}>
-              {item.eyebrow}
+            <div className="font-tirhuta text-[13px] leading-tight mt-0.5" style={{ opacity: 0.72 }}
+                 title={item.eyebrow}>
+              {item.eyebrowDev ? devanagariToTirhuta(item.eyebrowDev) : item.eyebrow}
             </div>
           </div>
         </>
