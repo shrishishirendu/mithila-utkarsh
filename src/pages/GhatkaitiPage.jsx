@@ -76,7 +76,7 @@ export default function GhatkaitiPage() {
   return (
     <div className="font-body min-h-screen pb-12" style={{ color: "var(--ink)" }}>
       <PageHero
-        eyebrow="Matrimony · Phase 1C"
+        eyebrow="Maithil matchmaking · by introduction"
         title="Matrimony"
         devanagari="घटकैती"
         accentColor="var(--indigo)"
