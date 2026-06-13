@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { SunMotif, LotusMotif, FishMotif, BorderPattern } from "./components/Motifs.jsx";
 import { PageHero } from "./components/PageBuildingBlocks.jsx";
+import { devanagariToTirhuta } from "./data/tirhuta.js";
 
 // ============================================================
 // DATA — Tirhuta / Mithilakshar
@@ -102,12 +103,14 @@ const CONJUNCTS = [
   { tirhuta: "𑒮𑓂𑒧", roman: "sma", dev: "स्म", parts: "sa + virama + ma", example: "smaraṇa",    gloss: "remembrance" },
 ];
 
+// label = English (primary, bold); dev = Devanagari term, rendered in Tirhuta
+// (Mithilakshar) as the secondary line; roman kept as the hover tooltip.
 const TABS = [
-  { id: "vowels",     label: "Svara",     sub: "Vowels",      data: VOWELS },
-  { id: "consonants", label: "Vyañjana",  sub: "Consonants",  data: CONSONANTS },
-  { id: "numbers",    label: "Aṅka",      sub: "Numbers",     data: NUMBERS },
-  { id: "matras",     label: "Mātrā",     sub: "Vowel signs", data: MATRAS },
-  { id: "conjuncts",  label: "Sanyukta",  sub: "Conjuncts",   data: CONJUNCTS },
+  { id: "vowels",     label: "Vowels",      roman: "Svara",     dev: "स्वर",     data: VOWELS },
+  { id: "consonants", label: "Consonants",  roman: "Vyañjana",  dev: "व्यञ्जन",  data: CONSONANTS },
+  { id: "numbers",    label: "Numbers",     roman: "Aṅka",      dev: "अङ्क",     data: NUMBERS },
+  { id: "matras",     label: "Vowel signs", roman: "Mātrā",     dev: "मात्रा",   data: MATRAS },
+  { id: "conjuncts",  label: "Conjuncts",   roman: "Sanyukta",  dev: "संयुक्त",  data: CONJUNCTS },
 ];
 
 // One representative consonant from each phonetic class, used in the
@@ -472,8 +475,9 @@ export default function MithilaksharLearn() {
                 <div className="font-display text-lg leading-none" style={{ color: active ? "var(--vermillion)" : "var(--ink)" }}>
                   {t.label}
                 </div>
-                <div className="text-[11px] tracking-wider uppercase mt-1" style={{ opacity: 0.6 }}>
-                  {t.sub} · {t.data.length}
+                <div className="text-[12px] mt-1 leading-tight" style={{ opacity: 0.65 }} title={t.roman}>
+                  <span className="font-tirhuta text-[14px]">{devanagariToTirhuta(t.dev)}</span>
+                  <span className="ml-1.5" style={{ opacity: 0.8 }}>· {t.data.length}</span>
                 </div>
               </button>
             );
@@ -488,10 +492,10 @@ export default function MithilaksharLearn() {
         )}
         {mode === "practice" && quiz && (
           <PracticePanel quiz={quiz} feedback={feedback} score={score}
-            tabLabel={currentTab.sub} onAnswer={answer} onNext={() => nextQuestion()} />
+            tabLabel={currentTab.label} onAnswer={answer} onNext={() => nextQuestion()} />
         )}
         {mode === "write" && (
-          <WritePanel data={currentData} tabLabel={currentTab.sub}
+          <WritePanel data={currentData} tabLabel={currentTab.label}
             writeIdx={writeIdx} setWriteIdx={setWriteIdx}
             practised={practised} onMarkPractised={markPractised} />
         )}
