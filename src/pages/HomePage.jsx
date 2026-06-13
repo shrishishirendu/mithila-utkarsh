@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, CalendarDays } from "lucide-react";
-import { FishMotif, BorderPattern, LotusMotif } from "../components/Motifs.jsx";
+import { FishMotif, BorderPattern, LotusMotif, PaagMotif, JoraMaachhMotif } from "../components/Motifs.jsx";
 import { devanagariToTirhuta } from "../data/tirhuta.js";
 import { PANCHANG_FESTIVALS } from "../data/panchang-festivals.js";
 
@@ -44,9 +44,14 @@ export default function HomePage() {
   return (
     <div className="font-body" style={{ color: "var(--ink)" }}>
       {/* HERO */}
-      <section className="px-6 lg:px-10 pt-10 pb-8 max-w-5xl mx-auto">
+      <section className="px-6 lg:px-10 pt-10 pb-8 max-w-5xl mx-auto relative">
+        {/* Paag watermark — a Maithil presence presiding over the welcome */}
+        <div className="absolute top-3 right-2 w-32 sm:w-44 pointer-events-none hidden sm:block"
+             style={{ color: "var(--vermillion)", opacity: 0.09 }} aria-hidden="true">
+          <PaagMotif className="w-full" />
+        </div>
         {/* Headline */}
-        <div className="max-w-2xl">
+        <div className="max-w-2xl relative">
           <div className="text-xs tracking-[0.2em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
             For the Maithil diaspora
           </div>
@@ -137,6 +142,13 @@ export default function HomePage() {
       </section>
 
       <footer className="px-6 lg:px-10 pb-10 max-w-5xl mx-auto">
+        {/* Mithila culture strip — line-art motifs (paag · joṛā-maachh · lotus) */}
+        <div className="flex items-center justify-center gap-6 mb-4"
+             style={{ color: "var(--vermillion)", opacity: 0.5 }} aria-hidden="true">
+          <PaagMotif className="w-9" />
+          <JoraMaachhMotif className="w-16" />
+          <LotusMotif className="w-7" />
+        </div>
         <div style={{ color: "var(--turmeric)", opacity: 0.6 }}>
           <BorderPattern />
         </div>
