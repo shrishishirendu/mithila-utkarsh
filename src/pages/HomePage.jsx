@@ -223,26 +223,36 @@ function VidyapatiVoice() {
 
   return (
     <section className="px-6 lg:px-10 py-8 max-w-5xl mx-auto">
-      <div className="relative rounded-3xl p-7 sm:p-10 overflow-hidden text-center"
-           style={{ background: "var(--paper)", border: "1px solid var(--cream-2)" }}>
+      <div className="relative rounded-3xl px-7 py-9 sm:px-10 sm:py-11 overflow-hidden text-center"
+           style={{
+             background: "var(--paper)",
+             // Matted double frame — an outer cream line + a faint vermillion inner
+             // rule, reminiscent of a bordered manuscript / aripan mount.
+             boxShadow: "inset 0 0 0 1px var(--cream-2), inset 0 0 0 5px var(--paper), inset 0 0 0 6px rgba(193, 39, 45, 0.16)",
+           }}>
         <div className="absolute -right-10 -bottom-10 pointer-events-none" style={{ color: "var(--vermillion)", opacity: 0.07 }}>
           <LotusMotif className="w-56 h-56" />
         </div>
         <div className="relative">
+          {/* Aripan-style top border accent (Maithil line art) */}
+          <div className="mx-auto max-w-[200px] mb-5" style={{ color: "var(--vermillion)", opacity: 0.5 }}>
+            <BorderPattern />
+          </div>
+
           <div className="text-[10px] tracking-[0.22em] uppercase font-semibold mb-5" style={{ color: "var(--leaf)" }}>
             Vidyapati · विद्यापति — Kavi Kokil of Mithila
           </div>
 
-          {/* Tirhuta (auto-generated) */}
-          <div className="font-tirhuta text-2xl sm:text-3xl leading-relaxed" style={{ color: "var(--vermillion-dark)" }}>
+          {/* Primary — Tirhuta, the largest focal point */}
+          <div className="font-tirhuta text-3xl sm:text-4xl leading-relaxed" style={{ color: "var(--vermillion-dark)" }}>
             {devanagariToTirhuta(line.dev)}
           </div>
-          {/* Devanagari */}
-          <div className="font-display text-xl sm:text-2xl mt-3 leading-snug">
+          {/* Secondary — Devanagari, medium */}
+          <div className="font-display text-xl sm:text-2xl mt-3 leading-snug" style={{ color: "var(--ink)" }}>
             {line.dev}
           </div>
-          {/* English rendering */}
-          <div className="font-display italic text-base sm:text-lg mt-4 max-w-2xl mx-auto" style={{ opacity: 0.68 }}>
+          {/* Tertiary — English, a step smaller, italic and softened */}
+          <div className="font-display italic text-base sm:text-lg mt-4 max-w-2xl mx-auto" style={{ color: "var(--ink)", opacity: 0.7 }}>
             “{line.en}”
           </div>
 
@@ -251,6 +261,11 @@ function VidyapatiVoice() {
               <span key={k} className="w-1.5 h-1.5 rounded-full transition-opacity"
                     style={{ background: "var(--vermillion)", opacity: k === i ? 0.9 : 0.25 }} />
             ))}
+          </div>
+
+          {/* Aripan-style bottom border accent (mirrored) */}
+          <div className="mx-auto max-w-[200px] mt-6 rotate-180" style={{ color: "var(--vermillion)", opacity: 0.5 }}>
+            <BorderPattern />
           </div>
         </div>
       </div>

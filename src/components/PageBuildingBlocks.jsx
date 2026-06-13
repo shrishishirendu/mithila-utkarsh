@@ -21,15 +21,21 @@ export function PageHero({ eyebrow, title, titleAccent, tirhuta, devanagari, des
           )}
           {tir ? (
             <>
-              {/* Primary — Mithilakshar (Tirhuta) */}
+              {/* Primary — Mithilakshar (Tirhuta): the largest, the focal point */}
               <h1 className="font-tirhuta text-4xl sm:text-5xl md:text-6xl leading-[1.05] tracking-tight"
                   style={{ color: "var(--vermillion-dark)" }} title="Mithilakshar (Tirhuta)">
                 {tir}
               </h1>
-              {/* Secondary — English */}
-              <div className="font-display text-2xl sm:text-3xl mt-2 leading-tight">
+              {/* Secondary — Devanagari translation, medium */}
+              {devanagari && (
+                <div className="font-display text-2xl sm:text-3xl mt-2 leading-tight" style={{ color: "var(--ink)" }}>
+                  {devanagari}
+                </div>
+              )}
+              {/* Tertiary — English, a step smaller, italic and softened */}
+              <div className="text-lg sm:text-xl italic mt-1.5 leading-snug" style={{ color: "var(--ink)", opacity: 0.7 }}>
                 {title}
-                {titleAccent && <span className="italic" style={{ color: accentColor }}> {titleAccent}</span>}
+                {titleAccent && <span style={{ color: accentColor }}> {titleAccent}</span>}
               </div>
             </>
           ) : (
@@ -42,12 +48,6 @@ export function PageHero({ eyebrow, title, titleAccent, tirhuta, devanagari, des
                 </>
               )}
             </h1>
-          )}
-          {/* Tertiary — Devanagari */}
-          {devanagari && (
-            <div className="mt-1.5 text-base sm:text-lg" style={{ color: "var(--ink)", opacity: 0.55 }}>
-              {devanagari}
-            </div>
           )}
           {description && (
             <p className="mt-4 max-w-xl text-[15px] leading-relaxed" style={{ opacity: 0.75 }}>

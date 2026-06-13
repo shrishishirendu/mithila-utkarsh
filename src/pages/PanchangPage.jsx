@@ -180,16 +180,16 @@ function PanchangHero({ meta, samvats }) {
               मिथिला-दुहिता सीता
             </span>
           </div>
-          {/* 3-script title — Mithilakshar primary, English, Devanagari */}
+          {/* 3-script title — Mithilakshar primary, Devanagari medium, English softened */}
           <h1 className="font-tirhuta text-4xl sm:text-5xl md:text-6xl leading-[1.05] tracking-tight"
               style={{ color: "var(--vermillion-dark)" }} title="Mithilakshar (Tirhuta)">
             {devanagariToTirhuta("पञ्चाङ्ग")}
           </h1>
-          <div className="font-display text-2xl sm:text-3xl mt-2 leading-tight">
-            Panchang <span className="italic" style={{ color: "var(--indigo)" }}>· calculated.</span>
-          </div>
-          <div className="mt-1.5 text-base sm:text-lg" style={{ color: "var(--ink)", opacity: 0.55 }}>
+          <div className="font-display text-2xl sm:text-3xl mt-2 leading-tight" style={{ color: "var(--ink)" }}>
             पञ्चाङ्ग
+          </div>
+          <div className="text-lg sm:text-xl italic mt-1.5 leading-snug" style={{ color: "var(--ink)", opacity: 0.7 }}>
+            Panchang <span style={{ color: "var(--indigo)" }}>· calculated.</span>
           </div>
           <p className="mt-4 max-w-xl text-[15px] leading-relaxed" style={{ opacity: 0.75 }}>
             Tithi, nakshatra, yoga, karana — the astronomical fabric of a Maithil day. Calculated with Swiss Ephemeris and Lahiri ayanamsa, for any city, any date.
