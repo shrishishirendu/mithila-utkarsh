@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Sun, Moon, MapPin, Clock, AlertTriangle, Loader2 } from "lucide-react";
+import { Sun, Moon, MapPin, Clock, AlertTriangle, Loader2, CalendarDays } from "lucide-react";
 import { BorderPattern } from "../components/Motifs.jsx";
 import { SitaMotif } from "../components/SitaMotif.jsx";
 import { YearHeaderStrip } from "../components/YearHeaderStrip.jsx";
 import { NavadhikaraPanel } from "../components/NavadhikaraPanel.jsx";
 import { FestivalCalendar } from "../components/FestivalCalendar.jsx";
 import { metaForDate } from "../data/panchang-meta-908.js";
+import { computeSamvats } from "../data/samvats.js";
 import { festivalsForDate } from "../data/panchang-festivals.js";
 import { devanagariToTirhuta } from "../data/tirhuta.js";
 
@@ -50,7 +51,8 @@ export default function PanchangPage() {
   const resultRef = useRef(null);
 
   const city = CITIES.find((c) => c.id === cityId) || CITIES[0];
-  const meta = metaForDate(date);
+  const meta = metaForDate(date);              // officers/harvest — only for the covered year
+  const samvats = computeSamvats(date);        // La Sam / Bangla / Vikram / CE — any year
   const todaysFestivals = festivalsForDate(date);
 
   // Picking a day in the calendar updates the selected date and brings the
@@ -84,29 +86,45 @@ export default function PanchangPage() {
 
   return (
     <div className="font-body min-h-screen" style={{ color: "var(--ink)" }}>
-      <PanchangHero meta={meta} />
+      <PanchangHero meta={meta} samvats={samvats} />
 
-      {/* City control — the only input; the calendar drives the date */}
+      {/* Controls — city + date. The month calendar below also drives the date. */}
       <section className="px-6 lg:px-10 py-4 max-w-5xl mx-auto">
         <div className="rounded-3xl p-5 sm:p-6 border"
              style={{ background: "var(--paper)", borderColor: "var(--cream-2)" }}>
-          <label className="block max-w-md">
-            <span className="text-[10px] tracking-[0.18em] uppercase font-semibold flex items-center gap-1.5"
-                  style={{ color: "var(--indigo)" }}>
-              <MapPin className="w-3 h-3" /> City
-            </span>
-            <select value={cityId}
-                    onChange={(e) => setCityId(e.target.value)}
-                    className="mt-2 w-full px-3 py-2.5 rounded-xl text-sm border outline-none focus:ring-2"
-                    style={{ background: "var(--cream)", borderColor: "var(--cream-2)" }}>
-              {CITIES.map((c) => (
-                <option key={c.id} value={c.id}>{c.name} — {c.region}</option>
-              ))}
-            </select>
-            <span className="block text-[11px] mt-2" style={{ opacity: 0.55 }}>
-              Pick a day in the calendar below to see its full panchang.
-            </span>
-          </label>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {/* City */}
+            <label className="block">
+              <span className="text-[10px] tracking-[0.18em] uppercase font-semibold flex items-center gap-1.5"
+                    style={{ color: "var(--indigo)" }}>
+                <MapPin className="w-3 h-3" /> City
+              </span>
+              <select value={cityId}
+                      onChange={(e) => setCityId(e.target.value)}
+                      className="mt-2 w-full px-3 py-2.5 rounded-xl text-sm border outline-none focus:ring-2"
+                      style={{ background: "var(--cream)", borderColor: "var(--cream-2)" }}>
+                {CITIES.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name} — {c.region}</option>
+                ))}
+              </select>
+            </label>
+
+            {/* Date — jump straight to any day, e.g. a birthday decades back */}
+            <label className="block">
+              <span className="text-[10px] tracking-[0.18em] uppercase font-semibold flex items-center gap-1.5"
+                    style={{ color: "var(--indigo)" }}>
+                <CalendarDays className="w-3 h-3" /> Date
+              </span>
+              <input type="date" value={date} min="1900-01-01" max="2100-12-31"
+                     onChange={(e) => e.target.value && handleSelectDate(e.target.value)}
+                     className="mt-2 w-full px-3 py-2.5 rounded-xl text-sm border outline-none focus:ring-2"
+                     style={{ background: "var(--cream)", borderColor: "var(--cream-2)" }} />
+            </label>
+          </div>
+          <span className="block text-[11px] mt-3" style={{ opacity: 0.55 }}>
+            Pick any date — even decades back, for a birthday — or tap a day in the calendar below.
+            The samvats and daily astronomy are calculated for any year.
+          </span>
         </div>
       </section>
 
@@ -150,7 +168,7 @@ export default function PanchangPage() {
   );
 }
 
-function PanchangHero({ meta }) {
+function PanchangHero({ meta, samvats }) {
   return (
     <section className="px-6 lg:px-10 pt-8 pb-8 max-w-5xl mx-auto relative">
       <div className="flex flex-col lg:flex-row items-start gap-6">
@@ -190,7 +208,7 @@ function PanchangHero({ meta }) {
 
         {/* Right column: year strip only */}
         <div className="w-full lg:w-[320px] shrink-0">
-          <YearHeaderStrip meta={meta} />
+          <YearHeaderStrip samvats={samvats} />
         </div>
       </div>
 

@@ -15,7 +15,26 @@ const ROLE_ICONS = {
 };
 
 export function NavadhikaraPanel({ meta }) {
-  if (!meta) return null;
+  // Officers/harvest figures are published per year in the printed Panchang —
+  // we only hold them for the covered year. Other years degrade to a note.
+  if (!meta) {
+    return (
+      <div className="rounded-3xl p-4 sm:p-5"
+           style={{ background: "var(--paper)", border: "1px solid var(--cream-2)" }}>
+        <div className="text-[10px] tracking-[0.18em] uppercase font-semibold"
+             style={{ color: "var(--indigo)" }}>
+          Navadhikāra · नवाधिकार
+        </div>
+        <p className="text-[12px] mt-1.5 leading-relaxed" style={{ opacity: 0.7 }}>
+          The year's officers (King, Minister, rainfall, grain) are published per year
+          in the printed Panchang. We currently hold them for{" "}
+          <span className="font-semibold" style={{ color: "var(--vermillion-dark)" }}>La. Sam. 908 (2026–27)</span> only —
+          other years are pending pandit-validated data. The samvats and the daily
+          astronomy above are calculated and accurate for any date.
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="rounded-3xl overflow-hidden"
          style={{ background: "var(--paper)", border: "1px solid var(--cream-2)" }}>

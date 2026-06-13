@@ -1,30 +1,30 @@
 // Year-header strip showing the four samvats / calendar systems for the current Mithila year.
 // Lakshmana Samvat is most prominent — the printed Panchang typically omits it, so we reclaim it here.
 
-export function YearHeaderStrip({ meta }) {
-  if (!meta) return null;
+export function YearHeaderStrip({ samvats }) {
+  if (!samvats) return null;
 
   const items = [
     {
       label: "लक्ष्मण सम्वत्",
       labelEn: "Lakshmana Samvat",
-      value: String(meta.samvats.lakshmana),
+      value: String(samvats.lakshmana),
       prominent: true,
     },
     {
       label: "बङ्गाब्द",
       labelEn: "Bangla Sann",
-      value: String(meta.samvats.bangla),
+      value: String(samvats.bangla),
     },
     {
       label: "विक्रम सम्वत्",
       labelEn: "Vikram Samvat",
-      value: `${meta.samvats.vikram.from}–${String(meta.samvats.vikram.to).slice(-2)}`,
+      value: `${samvats.vikram.from}–${String(samvats.vikram.to).slice(-2)}`,
     },
     {
       label: "ईस्वी सन्",
       labelEn: "Common Era",
-      value: `${meta.samvats.gregorian.from}–${String(meta.samvats.gregorian.to).slice(-2)}`,
+      value: `${samvats.gregorian.from}–${String(samvats.gregorian.to).slice(-2)}`,
     },
   ];
 
