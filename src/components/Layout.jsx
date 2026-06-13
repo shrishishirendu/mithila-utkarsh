@@ -49,7 +49,7 @@ function NavItemRow({ item, onNavigate, compact }) {
       }
       style={({ isActive }) =>
         isActive
-          ? { background: "var(--paper)", boxShadow: "inset 0 0 0 1px var(--cream-2)" }
+          ? { background: "var(--paper)", boxShadow: "inset 0 0 0 1px var(--cream-2), 0 1px 3px rgba(27, 26, 46, 0.07)" }
           : { color: "var(--ink)" }
       }
     >
@@ -71,7 +71,8 @@ function NavItemRow({ item, onNavigate, compact }) {
             >
               {item.label}
             </div>
-            <div className="font-tirhuta text-[13px] leading-tight mt-0.5" style={{ opacity: 0.72 }}
+            <div className="font-tirhuta text-[13px] font-medium leading-tight mt-0.5"
+                 style={{ color: "var(--ink)", opacity: 0.85 }}
                  title={item.eyebrow}>
               {item.eyebrowDev ? devanagariToTirhuta(item.eyebrowDev) : item.eyebrow}
             </div>
@@ -117,24 +118,24 @@ function SidebarContent({ onNavigate, learnedCount, totalCount }) {
           <Fragment key={item.id}>
             <NavItemRow item={item} onNavigate={onNavigate} />
 
-            {/* Compact Mithilakshar progress — sits right under the Learn item */}
-            {item.id === "mithilakshar" && (
-              <div className="ml-12 mr-3 mb-1.5 mt-0.5">
-                <div className="flex items-center justify-between text-[9px] tracking-wide uppercase"
-                     style={{ opacity: 0.55 }}>
-                  <span>{learnedCount}/{totalCount} learned</span>
-                  <span>{pct}%</span>
-                </div>
-                <div className="h-1 rounded-full mt-1 overflow-hidden" style={{ background: "var(--cream-2)" }}>
-                  <div className="h-full transition-all duration-500"
-                       style={{ width: `${pct}%`, background: "linear-gradient(90deg, var(--turmeric), var(--vermillion))" }} />
-                </div>
-              </div>
-            )}
-
-            {/* Nested language & script tools — always visible, with a guide line */}
+            {/* Nested group under a parent — the learning-progress card (Learn only)
+                plus the child links, indented behind a guide line so they read as
+                one cluster grouped beneath the parent. */}
             {item.children && (
-              <div className="ml-5 pl-3 mb-1.5" style={{ borderLeft: "1px solid var(--cream-2)" }}>
+              <div className="ml-5 pl-3 mt-0.5 mb-1.5" style={{ borderLeft: "1.5px solid var(--cream-2)" }}>
+                {item.id === "mithilakshar" && (
+                  <div className="rounded-xl px-3 py-2 mb-1" style={{ background: "var(--cream-2)" }}>
+                    <div className="flex items-center justify-between text-[10px] font-medium"
+                         style={{ color: "var(--ink)", opacity: 0.75 }}>
+                      <span>{learnedCount} / {totalCount} learned</span>
+                      <span style={{ color: "var(--vermillion-dark)" }}>{pct}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full mt-1.5 overflow-hidden" style={{ background: "var(--paper)" }}>
+                      <div className="h-full rounded-full transition-all duration-500"
+                           style={{ width: `${pct}%`, background: "linear-gradient(90deg, var(--turmeric), var(--vermillion))" }} />
+                    </div>
+                  </div>
+                )}
                 {item.children.map((child) => (
                   <NavItemRow key={child.id} item={child} onNavigate={onNavigate} compact />
                 ))}
