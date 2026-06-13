@@ -55,9 +55,9 @@ export default function HomePage() {
                title="Mithila Utkarsh in Tirhuta">
             𑒧𑒱𑒟𑒱𑒪𑒰 𑒅𑒞𑓂𑒏𑒩𑓂𑒭
           </div>
-          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[0.95] tracking-tight mt-3">
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[0.95] tracking-tight mt-3 text-balance">
             <span style={{ color: "var(--ink)" }}>The flourishing</span>{" "}
-            <span className="italic" style={{ color: "var(--vermillion)" }}>of Mithila</span>
+            <span className="italic whitespace-nowrap" style={{ color: "var(--vermillion)" }}>of Mithila</span>
             <span style={{ color: "var(--ink)" }}> — carried to the world.</span>
           </h1>
           <p className="mt-5 max-w-xl text-[16px] leading-relaxed" style={{ opacity: 0.78 }}>
@@ -119,13 +119,13 @@ export default function HomePage() {
       <section className="px-6 lg:px-10 py-10 max-w-5xl mx-auto">
         <div className="rounded-3xl p-8 sm:p-10 relative overflow-hidden"
              style={{ background: "var(--ink)", color: "var(--paper)" }}>
-          <div className="absolute -top-4 -right-4 opacity-15" style={{ color: "var(--turmeric)" }}>
-            <FishMotif className="w-48" />
+          <div className="absolute -top-6 -right-6 opacity-25" style={{ color: "var(--turmeric)" }}>
+            <FishMotif className="w-52" />
           </div>
           <div className="text-xs tracking-[0.2em] uppercase mb-3" style={{ color: "var(--turmeric)" }}>
             Why this exists
           </div>
-          <p className="font-display text-2xl sm:text-3xl leading-snug max-w-2xl">
+          <p className="font-display text-2xl sm:text-3xl leading-[1.42] tracking-[0.012em] max-w-2xl">
             We grew up hearing a language and seeing a script our grandparents wrote in.
             Our children, born abroad, deserve to know it too.
             Mithila Utkarsh is the home where that knowledge lives — wherever we are.
@@ -194,12 +194,13 @@ function AajLine() {
           )}
         </div>
         {fest && (
-          <Link to={fest.slug ? `/festivals/${fest.slug}` : "/panchang"}
-                className="text-sm sm:ml-auto inline-flex items-center gap-1.5 group shrink-0"
-                style={{ color: "var(--vermillion-dark)" }}>
-            <span style={{ opacity: 0.65 }}>Next:</span>
+          <Link to={fest.slug ? `/festivals/${fest.slug}` : "/festivals"}
+                aria-label={`Next festival: ${fest.nameEnglish}, ${countdown} — open in Festivals`}
+                className="group sm:ml-auto inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm shrink-0 transition-all hover:brightness-110 hover:shadow-sm focus:outline-none focus-visible:ring-2"
+                style={{ background: "var(--vermillion-dark)", color: "var(--paper)" }}>
+            <span style={{ opacity: 0.85 }}>Next:</span>
             <span className="font-display font-medium">{fest.nameEnglish}</span>
-            <span style={{ opacity: 0.65 }}>· {countdown}</span>
+            <span style={{ opacity: 0.85 }}>· {countdown}</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         )}
