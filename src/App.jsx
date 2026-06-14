@@ -22,6 +22,9 @@ import NotFoundPage from "./pages/NotFoundPage.jsx";
 import AdminWordsPage from "./pages/AdminWordsPage.jsx";
 import LiteraturePage from "./pages/LiteraturePage.jsx";
 import LiteratureWorkPage from "./pages/LiteratureWorkPage.jsx";
+import LiteratureContributePage from "./pages/LiteratureContributePage.jsx";
+import LiteratureContributionPage from "./pages/LiteratureContributionPage.jsx";
+import AdminLiteraturePage from "./pages/AdminLiteraturePage.jsx";
 import ArtsPage from "./pages/ArtsPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
@@ -42,6 +45,8 @@ const router = createBrowserRouter([
       { path: "ghatkaiti",          element: <GhatkaitiPage /> },
       { path: "shop",               element: <MerchandisePage /> },
       { path: "literature",         element: <LiteraturePage /> },
+      { path: "literature/contribute", element: <LiteratureContributePage /> },
+      { path: "literature/c/:id",   element: <LiteratureContributionPage /> },
       { path: "literature/:slug",   element: <LiteratureWorkPage /> },
       { path: "arts",               element: <ArtsPage /> },
       { path: "blog",               element: <BlogPage /> },
@@ -54,6 +59,7 @@ const router = createBrowserRouter([
       { path: "reset-password",     element: <ResetPasswordPage /> },
       { path: "profile",            element: <ProfilePage /> },
       { path: "admin/words",        element: <AdminWordsPage /> },
+      { path: "admin/literature",   element: <AdminLiteraturePage /> },
       { path: "*",                  element: <NotFoundPage /> },
     ],
   },

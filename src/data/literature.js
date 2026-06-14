@@ -74,7 +74,9 @@ export const ERAS = [
 ];
 
 // ------------------------------------------------------------
-// Authors — a starting scaffold. Add dates/bios as you verify them.
+// Authors — real, factual introductions (a starting scaffold you can expand).
+// `blurb` is the one-line summary; `intro` is the longer note shown on the card.
+// Dates are kept broad on purpose where the record is uncertain.
 // ------------------------------------------------------------
 export const AUTHORS = [
   {
@@ -83,15 +85,9 @@ export const AUTHORS = [
     devanagari: "विद्यापति",
     era: "classical",
     dates: "14th–15th century",
-    blurb: "The Maithil Kokil — foundational poet of Maithili padāvalī.",
-  },
-  {
-    id: "govinda-das",
-    name: "Govinda Dās",
-    devanagari: "गोविन्द दास",
-    era: "bhakti",
-    dates: "",
-    blurb: "Vaishnava devotional padāvalī in the tradition after Vidyāpati.",
+    blurb: "The Maithil Kavi Kokil — father of Maithili poetry.",
+    intro:
+      "Revered as the Maithil Kavi Kokil, the 'poet-cuckoo of Mithila'. A court poet under the Oinwar kings, he sang of Rādhā and Kṛṣṇa and of Śiva and the Goddess in Maithili, alongside Sanskrit and Avahaṭṭha works such as Puruṣa-parīkṣā and Kīrtilatā. His padāvalī travelled far beyond Mithila — into Bengal, Assam and Odisha — and shaped the whole Vaishnava bhakti song tradition.",
   },
   {
     id: "lochana",
@@ -99,7 +95,9 @@ export const AUTHORS = [
     devanagari: "लोचन",
     era: "bhakti",
     dates: "",
-    blurb: "Author of the Rāga-taraṅgiṇī, a treatise on rāga and song.",
+    blurb: "Compiler of the Rāga-taraṅgiṇī.",
+    intro:
+      "Traditionally credited with the Rāga-taraṅgiṇī, a treatise on rāga and song that gathered and classified many early padas — an important early source for how Maithili verse was sung.",
   },
   {
     id: "chanda-jha",
@@ -108,22 +106,28 @@ export const AUTHORS = [
     era: "renaissance",
     dates: "19th century",
     blurb: "Author of the Mithilā-bhāṣā Rāmāyaṇa.",
+    intro:
+      "A leading poet of the Maithili renaissance, best known for the Mithilā-bhāṣā Rāmāyaṇa, which carried the Rāma story into everyday Maithili and helped establish the language in print.",
   },
   {
     id: "harimohan-jha",
     name: "Harimohan Jhā",
     devanagari: "हरिमोहन झा",
     era: "modern",
-    dates: "20th century",
-    blurb: "Satirist and novelist — Kanyādān, Dvirāgaman.",
+    dates: "1908–1984",
+    blurb: "Novelist and satirist — Kanyādān, Dvirāgaman.",
+    intro:
+      "One of the most beloved figures of modern Maithili prose. His gently satirical novels Kanyādān and Dvirāgaman, and the witty Khattar Kakak Tarang, hold a mirror to Maithil society with affection and humour.",
   },
   {
     id: "yatri-nagarjun",
     name: "Yātrī (Nāgārjun)",
     devanagari: "यात्री / नागार्जुन",
     era: "modern",
-    dates: "20th century",
-    blurb: "Baidyanāth Mishra — a major poet in both Maithili and Hindi.",
+    dates: "1911–1998",
+    blurb: "A major poet in both Maithili and Hindi.",
+    intro:
+      "Baidyanāth Mishra wrote as 'Yātrī' in Maithili and as 'Nāgārjun' in Hindi. A people's poet with a sharp political voice, his Maithili verse helped bring the language firmly into the modern era.",
   },
 ];
 
@@ -168,7 +172,7 @@ export const WORKS = [
     slug: "bhakti-song",
     title: "Devotional song",
     titleDevanagari: "भक्ति-गीत",
-    authorId: "govinda-das",
+    authorId: "lochana",
     era: "bhakti",
     form: "song",
     status: "draft",
@@ -265,4 +269,8 @@ export function getAuthor(id) {
 
 export function getAuthorsByEra(eraId) {
   return AUTHORS.filter((a) => a.era === eraId);
+}
+
+export function getEra(id) {
+  return ERAS.find((e) => e.id === id) || null;
 }
