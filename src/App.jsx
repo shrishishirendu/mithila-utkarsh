@@ -21,6 +21,7 @@ import ProfilePage from "./pages/ProfilePage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import AdminWordsPage from "./pages/AdminWordsPage.jsx";
 import LiteraturePage from "./pages/LiteraturePage.jsx";
+import LiteratureWorkPage from "./pages/LiteratureWorkPage.jsx";
 import ArtsPage from "./pages/ArtsPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
@@ -41,6 +42,7 @@ const router = createBrowserRouter([
       { path: "ghatkaiti",          element: <GhatkaitiPage /> },
       { path: "shop",               element: <MerchandisePage /> },
       { path: "literature",         element: <LiteraturePage /> },
+      { path: "literature/:slug",   element: <LiteratureWorkPage /> },
       { path: "arts",               element: <ArtsPage /> },
       { path: "blog",               element: <BlogPage /> },
       { path: "blog/:slug",         element: <BlogPostPage /> },
