@@ -25,6 +25,7 @@ import LiteratureWorkPage from "./pages/LiteratureWorkPage.jsx";
 import LiteratureContributePage from "./pages/LiteratureContributePage.jsx";
 import LiteratureContributionPage from "./pages/LiteratureContributionPage.jsx";
 import AdminLiteraturePage from "./pages/AdminLiteraturePage.jsx";
+import AdminGhatkaitiPage from "./pages/AdminGhatkaitiPage.jsx";
 import ArtsPage from "./pages/ArtsPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
@@ -60,6 +61,7 @@ const router = createBrowserRouter([
       { path: "profile",            element: <ProfilePage /> },
       { path: "admin/words",        element: <AdminWordsPage /> },
       { path: "admin/literature",   element: <AdminLiteraturePage /> },
+      { path: "admin/ghatkaiti",    element: <AdminGhatkaitiPage /> },
       { path: "*",                  element: <NotFoundPage /> },
     ],
   },
