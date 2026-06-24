@@ -94,6 +94,17 @@ function parsePhone(contact) {
   return { cc: DEFAULT_CC, number: contact };
 }
 
+function ageFromDob(dob) {
+  if (!dob) return null;
+  const b = new Date(dob);
+  if (isNaN(b)) return null;
+  const now = new Date();
+  let a = now.getFullYear() - b.getFullYear();
+  const m = now.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < b.getDate())) a--;
+  return a;
+}
+
 const BLANK = {
   full_name: "", contact_email: "",
   gender: "", looking_for: "", dob: "", birth_time: "", birth_place: "",
@@ -121,6 +132,7 @@ export default function GhatkaitiPage() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [phoneCc, setPhoneCc] = useState(DEFAULT_CC);
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [consent, setConsent] = useState(false);
 
   const approved = status === "approved";
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v }));
@@ -148,6 +160,7 @@ export default function GhatkaitiPage() {
         const parsed = parsePhone(data.contact);
         setPhoneCc(parsed.cc); setPhoneNumber(parsed.number);
         setPhotos(data.photos || []);
+        setConsent(!!data.consented_at);
       }
       setLoading(false);
     })();
@@ -234,15 +247,23 @@ export default function GhatkaitiPage() {
   }, [tab, approved, candidates, matches]);
 
   async function save(submitForReview) {
-    setSaving(true); setError(null); setSavedAt(null);
+    setError(null); setSavedAt(null);
+    if (submitForReview) {
+      if (!consent) { setError("Please confirm you're 18 or older and consent, before submitting."); return; }
+      const a = ageFromDob(form.dob);
+      if (a !== null && a < 18) { setError("You must be 18 or older to submit a biodata."); return; }
+    }
+    setSaving(true);
     const nextStatus = submitForReview ? "submitted" : status;
     const clean = Object.fromEntries(
       Object.entries(form).map(([k, v]) => [k, (typeof v === "string" ? v.trim() : v) || null])
     );
     const contact = phoneNumber.trim() ? `${phoneCc} ${phoneNumber.trim()}` : null;
-    const { error } = await supabase.from("matrimony_profiles").upsert({
+    const payload = {
       id: user.id, ...clean, contact, status: nextStatus, updated_at: new Date().toISOString(),
-    });
+    };
+    if (submitForReview) payload.consented_at = new Date().toISOString();
+    const { error } = await supabase.from("matrimony_profiles").upsert(payload);
     setSaving(false);
     if (error) { setError("Couldn't save. " + error.message); return; }
     setStatus(nextStatus);
@@ -312,6 +333,7 @@ export default function GhatkaitiPage() {
                 onAddPhoto={onAddPhoto} onRemovePhoto={onRemovePhoto} uploadingPhoto={uploadingPhoto}
                 phoneCc={phoneCc} phoneNumber={phoneNumber}
                 onPhoneCc={setPhoneCc} onPhoneNumber={setPhoneNumber}
+                consent={consent} onConsent={setConsent}
               />
             )}
 
@@ -378,7 +400,7 @@ function Tabs({ tab, setTab, approved, matchCount }) {
 // ============================================================
 function BiodataTab({ status, loading, form, set, save, saving, error, savedAt,
                       photos, photoUrls, onAddPhoto, onRemovePhoto, uploadingPhoto,
-                      phoneCc, phoneNumber, onPhoneCc, onPhoneNumber }) {
+                      phoneCc, phoneNumber, onPhoneCc, onPhoneNumber, consent, onConsent }) {
   return (
     <>
       <div className="rounded-3xl p-5 sm:p-6 mb-5" style={{ background: "var(--cream-2)" }}>
@@ -457,13 +479,22 @@ function BiodataTab({ status, loading, form, set, save, saving, error, savedAt,
             </div>
           )}
 
+          <label className="flex items-start gap-2.5 text-sm cursor-pointer pt-1">
+            <input type="checkbox" checked={consent} onChange={(e) => onConsent(e.target.checked)}
+                   className="mt-0.5 w-4 h-4 shrink-0" style={{ accentColor: "var(--vermillion)" }} />
+            <span style={{ opacity: 0.8 }}>
+              I confirm I am <strong>18 years or older</strong>, this biodata is my own (or shared with that person's
+              consent), and I consent to it being shown to potential matches as described.
+            </span>
+          </label>
+
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <button type="submit" disabled={saving}
                     className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm font-semibold disabled:opacity-50"
                     style={{ background: "transparent", color: "var(--ink)", border: "1px solid var(--cream-2)" }}>
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save draft
             </button>
-            <button type="button" disabled={saving} onClick={() => save(true)}
+            <button type="button" disabled={saving || !consent} onClick={() => save(true)}
                     className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm font-semibold disabled:opacity-50"
                     style={{ background: "var(--vermillion)", color: "var(--paper)" }}>
               <Send className="w-4 h-4" /> Submit for review
