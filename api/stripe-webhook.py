@@ -19,6 +19,7 @@ from http.server import BaseHTTPRequestHandler
 import json
 import os
 import urllib.request
+import urllib.error
 
 import stripe
 
@@ -40,18 +41,22 @@ def grant_credits(session):
         "amt": session.get("amount_total"),
         "cur": session.get("currency"),
     }).encode("utf-8")
+    # Send the key ONLY in `apikey`. The new sb_secret_* keys are NOT JWTs, so
+    # passing them as `Authorization: Bearer` makes PostgREST fall back to anon
+    # (→ permission denied). apikey alone is mapped to service_role and works for
+    # both the new secret keys and legacy service_role JWTs.
     req = urllib.request.Request(
         f"{SUPABASE_URL}/rest/v1/rpc/grant_credits",
         data=payload,
-        headers={
-            "apikey": SERVICE_ROLE,
-            "Authorization": f"Bearer {SERVICE_ROLE}",
-            "Content-Type": "application/json",
-        },
+        headers={"apikey": SERVICE_ROLE, "Content-Type": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=8) as resp:
-        resp.read()
+    try:
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            resp.read()
+    except urllib.error.HTTPError as he:
+        detail = he.read().decode("utf-8", "replace")[:300]
+        raise Exception(f"grant_credits {he.code}: {detail}")
 
 
 class handler(BaseHTTPRequestHandler):
