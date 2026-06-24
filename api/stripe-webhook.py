@@ -81,8 +81,11 @@ class handler(BaseHTTPRequestHandler):
             self._send(503, {"error": "Webhook not configured."})
             return
 
+        # Verify the signature (raises if invalid). We don't use the returned
+        # object — we read the plain JSON below so attribute access is reliable
+        # across SDK/API versions.
         try:
-            event = stripe.Webhook.construct_event(
+            stripe.Webhook.construct_event(
                 raw, self.headers.get("Stripe-Signature"), WEBHOOK_SECRET
             )
         except Exception:
@@ -90,8 +93,9 @@ class handler(BaseHTTPRequestHandler):
             return
 
         try:
-            if event["type"] == "checkout.session.completed":
-                session = event["data"]["object"]
+            event = json.loads(raw)  # plain dict — .get() always works
+            if event.get("type") == "checkout.session.completed":
+                session = (event.get("data") or {}).get("object") or {}
                 if session.get("payment_status") == "paid":
                     grant_credits(session)
             self._send(200, {"received": True})
