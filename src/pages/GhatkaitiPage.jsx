@@ -16,7 +16,7 @@ const PHOTO_BUCKET = "matrimony-photos";
 
 // Flip to true once the Stripe keys are set in Vercel (and tested). Until then
 // "Buy credits" shows a friendly "coming soon" instead of a broken checkout.
-const PAYMENTS_LIVE = false;
+const PAYMENTS_LIVE = true;
 
 // Display only — the CHARGED amount lives server-side in api/create-checkout.py
 // (PACKS). Keep ids in sync with that file.
