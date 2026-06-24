@@ -14,6 +14,18 @@ const FREE_LIMIT = 2;
 const MAX_PHOTOS = 3;
 const PHOTO_BUCKET = "matrimony-photos";
 
+// Flip to true once the Stripe keys are set in Vercel (and tested). Until then
+// "Buy credits" shows a friendly "coming soon" instead of a broken checkout.
+const PAYMENTS_LIVE = false;
+
+// Display only — the CHARGED amount lives server-side in api/create-checkout.py
+// (PACKS). Keep ids in sync with that file.
+const CREDIT_PACKS = [
+  { id: "p10", credits: 10, price: "$5" },
+  { id: "p25", credits: 25, price: "$10", best: true },
+  { id: "p60", credits: 60, price: "$20" },
+];
+
 // Full country dial-code list as [dial, ISO-2, name]. Flags are derived from the
 // ISO code (no need to hand-type 195 emojis). NANP countries share +1.
 const RAW_COUNTRIES = [
@@ -135,6 +147,8 @@ export default function GhatkaitiPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [consent, setConsent] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [buyOpen, setBuyOpen] = useState(false);
+  const [checkingOut, setCheckingOut] = useState(null); // packId in flight
 
   const approved = status === "approved";
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v }));
@@ -176,6 +190,25 @@ export default function GhatkaitiPage() {
     if (data && data[0]) setSummary(data[0]);
   }
   useEffect(() => { if (user && approved) loadSummary(); }, [user, approved]);
+
+  // ---- Handle the return from Stripe Checkout ----
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get("purchase");
+    if (!p) return;
+    window.history.replaceState({}, "", "/ghatkaiti");
+    if (p === "success") {
+      setTab("browse");
+      setFlash({ kind: "ok", text: "Payment received — your credits will appear in a moment." });
+      // The webhook grants credits asynchronously; refresh a couple of times.
+      const t1 = setTimeout(() => loadSummary(), 1500);
+      const t2 = setTimeout(() => loadSummary(), 5000);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+    if (p === "cancel") {
+      setTab("browse");
+      setFlash({ kind: "warn", text: "Checkout cancelled — no charge was made." });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---- Resolve signed URLs for the member's own photos ----
   useEffect(() => {
@@ -301,7 +334,28 @@ export default function GhatkaitiPage() {
   }
 
   function buyCredits() {
-    setFlash({ kind: "warn", text: "Credit packs are coming soon — online payment is the next thing we're adding." });
+    if (!PAYMENTS_LIVE) { setFlash({ kind: "warn", text: "Credit packs are coming very soon." }); return; }
+    setBuyOpen(true);
+  }
+
+  async function startCheckout(packId) {
+    setCheckingOut(packId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { setCheckingOut(null); setFlash({ kind: "warn", text: "Please sign in again." }); return; }
+      const res = await fetch("/api/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ packId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.url) { window.location.href = data.url; return; }
+      setCheckingOut(null);
+      setFlash({ kind: "warn", text: data.error || "Couldn't start checkout. Please try again." });
+    } catch (_) {
+      setCheckingOut(null);
+      setFlash({ kind: "warn", text: "Couldn't reach the payment service." });
+    }
   }
 
   // Best-effort: email both sides when a match becomes mutual. Never blocks the
@@ -421,6 +475,8 @@ export default function GhatkaitiPage() {
         <div className="mt-10" style={{ color: "var(--vermillion)", opacity: 0.4 }}>
           <BorderPattern />
         </div>
+
+        <BuyCreditsModal open={buyOpen} onClose={() => setBuyOpen(false)} onBuy={startCheckout} checkingOut={checkingOut} />
       </section>
     </div>
   );
@@ -747,6 +803,48 @@ function MatchesPanel({ matches, onBlock, onReport }) {
 // ============================================================
 //  Small shared bits
 // ============================================================
+function BuyCreditsModal({ open, onClose, onBuy, checkingOut }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+         style={{ background: "rgba(27,26,46,0.55)" }} onClick={onClose}>
+      <div className="w-full max-w-md rounded-3xl p-6" style={{ background: "var(--paper)" }}
+           onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-1">
+          <div className="font-display text-xl">Buy interest credits</div>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg grid place-items-center" style={{ background: "var(--cream-2)" }}>
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <p className="text-sm mb-4" style={{ opacity: 0.7 }}>
+          Each credit lets you send one more interest. Pick a pack:
+        </p>
+        <div className="space-y-2.5">
+          {CREDIT_PACKS.map((p) => (
+            <button key={p.id} onClick={() => onBuy(p.id)} disabled={!!checkingOut}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-2xl border transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                    style={{ background: p.best ? "var(--cream-2)" : "var(--cream)", borderColor: p.best ? "var(--vermillion)" : "var(--cream-2)" }}>
+              <span className="flex items-center gap-2">
+                <span className="font-display text-lg">{p.credits} interests</span>
+                {p.best && (
+                  <span className="text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-full"
+                        style={{ background: "var(--vermillion)", color: "var(--paper)" }}>Best value</span>
+                )}
+              </span>
+              <span className="font-display text-lg" style={{ color: "var(--vermillion-dark)" }}>
+                {checkingOut === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : p.price}
+              </span>
+            </button>
+          ))}
+        </div>
+        <p className="text-[11px] mt-4 text-center" style={{ opacity: 0.55 }}>
+          Secure checkout by Stripe · prices in USD
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function FlashBanner({ flash, onClose }) {
   const styles = {
     ok:    { bg: "rgba(72,107,60,0.10)",  fg: "var(--leaf)",          Icon: CheckCircle2 },
