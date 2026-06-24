@@ -286,6 +286,7 @@ export default function GhatkaitiPage() {
     loadSummary();
     if (result === "mutual") {
       setMatches(null); // force refetch next time Matches opens
+      notifyMatch(candidateId); // fire-and-forget email to both sides
       setFlash({ kind: "match", text: "It's a match! You can see their contact in the Matches tab." });
     } else if (result === "sent") {
       setFlash({ kind: "ok", text: "Interest sent. If they're interested too, it becomes a match." });
@@ -298,6 +299,20 @@ export default function GhatkaitiPage() {
 
   function buyCredits() {
     setFlash({ kind: "warn", text: "Credit packs are coming soon — online payment is the next thing we're adding." });
+  }
+
+  // Best-effort: email both sides when a match becomes mutual. Never blocks the
+  // match flow — if email isn't configured yet, the endpoint just returns ok:false.
+  async function notifyMatch(otherId) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      await fetch("/api/notify-match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ otherId }),
+      });
+    } catch (_) { /* notification is best-effort */ }
   }
 
   const freeLeft = summary ? Math.max(0, FREE_LIMIT - summary.free_used) : null;
