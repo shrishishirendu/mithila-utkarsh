@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Check, RotateCcw, Loader2, Lock, Phone } from "lucide-react";
+import { Check, RotateCcw, Loader2, Lock, Phone, Flag } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import { supabase } from "../lib/supabase.js";
 import { PageHero } from "../components/PageBuildingBlocks.jsx";
@@ -18,6 +18,7 @@ export default function AdminGhatkaitiPage() {
   const { user, loading: authLoading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(null);
   const [rows, setRows] = useState([]);
+  const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("submitted");
@@ -51,6 +52,11 @@ export default function AdminGhatkaitiPage() {
           }));
           if (!cancelled) setRows(enriched);
         }
+        const { data: reps } = await supabase
+          .from("matrimony_reports")
+          .select("id, reporter_id, reported_id, reason, status, created_at")
+          .order("created_at", { ascending: false });
+        if (!cancelled) setReports(reps || []);
       }
       setLoading(false);
     })();
@@ -60,6 +66,11 @@ export default function AdminGhatkaitiPage() {
   async function setStatus(id, status) {
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
     await supabase.from("matrimony_profiles").update({ status }).eq("id", id);
+  }
+
+  async function markReviewed(id) {
+    setReports((rs) => rs.map((r) => (r.id === id ? { ...r, status: "reviewed" } : r)));
+    await supabase.from("matrimony_reports").update({ status: "reviewed" }).eq("id", id);
   }
 
   const counts = {
@@ -92,6 +103,8 @@ export default function AdminGhatkaitiPage() {
           </div>
         ) : (
           <>
+            <ReportsPanel reports={reports} rows={rows} onReviewed={markReviewed} />
+
             <div className="flex flex-wrap gap-2">
               {FILTERS.map(([key, label]) => (
                 <button key={key} onClick={() => setFilter(key)}
@@ -214,6 +227,40 @@ function Para({ label, text }) {
     <div className="mt-2 text-sm">
       <div className="text-[10px] tracking-[0.16em] uppercase mb-0.5" style={{ color: "var(--vermillion-dark)", opacity: 0.7 }}>{label}</div>
       <div style={{ opacity: 0.82 }}>{text}</div>
+    </div>
+  );
+}
+
+function ReportsPanel({ reports, rows, onReviewed }) {
+  if (!reports || reports.length === 0) return null;
+  const open = reports.filter((r) => r.status === "open");
+  const nameFor = (id) => rows.find((r) => r.id === id)?.full_name || (id ? id.slice(0, 8) : "—");
+  return (
+    <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(180,58,46,0.06)", border: "1px solid var(--vermillion)" }}>
+      <div className="flex items-center gap-2 mb-2.5">
+        <Flag className="w-4 h-4" style={{ color: "var(--vermillion-dark)" }} />
+        <span className="font-display text-sm" style={{ color: "var(--vermillion-dark)" }}>
+          Reports{open.length > 0 ? ` · ${open.length} open` : ""}
+        </span>
+      </div>
+      <div className="space-y-2">
+        {reports.map((r) => (
+          <div key={r.id} className="text-sm flex flex-wrap items-center gap-x-2 gap-y-1">
+            <strong>{nameFor(r.reported_id)}</strong>
+            <span style={{ opacity: 0.6 }}>reported by {nameFor(r.reporter_id)}</span>
+            {r.reason && <span style={{ opacity: 0.85 }}>— “{r.reason}”</span>}
+            {r.status === "open" ? (
+              <button onClick={() => onReviewed(r.id)}
+                      className="ml-auto text-[11px] px-2 py-0.5 rounded-full"
+                      style={{ background: "var(--leaf)", color: "var(--paper)" }}>
+                Mark reviewed
+              </button>
+            ) : (
+              <span className="ml-auto text-[10px] uppercase tracking-wider" style={{ opacity: 0.5 }}>reviewed</span>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

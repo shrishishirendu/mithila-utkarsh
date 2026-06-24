@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   Heart, Lock, ScrollText, Loader2, CheckCircle2, Clock, ShieldCheck,
   LogIn, UserPlus, Send, Save, Sparkles, Users, User, Phone, ImagePlus, X,
+  Trash2, Ban, Flag,
 } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import { supabase } from "../lib/supabase.js";
@@ -133,6 +134,7 @@ export default function GhatkaitiPage() {
   const [phoneCc, setPhoneCc] = useState(DEFAULT_CC);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [consent, setConsent] = useState(false);
+  const [paused, setPaused] = useState(false);
 
   const approved = status === "approved";
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v }));
@@ -161,6 +163,7 @@ export default function GhatkaitiPage() {
         setPhoneCc(parsed.cc); setPhoneNumber(parsed.number);
         setPhotos(data.photos || []);
         setConsent(!!data.consented_at);
+        setPaused(!!data.paused);
       }
       setLoading(false);
     })();
@@ -315,6 +318,48 @@ export default function GhatkaitiPage() {
     } catch (_) { /* notification is best-effort */ }
   }
 
+  // ---- Withdraw: pause / delete my biodata ----
+  async function togglePause(next) {
+    setPaused(next);
+    await supabase.from("matrimony_profiles").upsert({
+      id: user.id, paused: next, updated_at: new Date().toISOString(),
+    });
+  }
+
+  async function deleteBiodata() {
+    if (!window.confirm("Delete your biodata permanently? This removes your profile, photos, interests and matches. This can't be undone.")) return;
+    if (photos.length) { try { await supabase.storage.from(PHOTO_BUCKET).remove(photos); } catch (_) {} }
+    const { error } = await supabase.rpc("delete_my_biodata");
+    if (error) { setError("Couldn't delete. " + error.message); return; }
+    setForm(BLANK); setStatus("draft"); setPhotos([]); setPhotoUrls({}); setPaused(false);
+    setPhoneCc(DEFAULT_CC); setPhoneNumber(""); setConsent(false);
+    setCandidates(null); setMatches(null); setSummary(null);
+    setTab("biodata"); setSavedAt(null);
+    setFlash({ kind: "ok", text: "Your biodata has been deleted." });
+  }
+
+  // ---- Safety: block / report ----
+  async function hideCandidate(id) {
+    await supabase.from("matrimony_blocks").insert({ blocker_id: user.id, blocked_id: id });
+    setCandidates((cs) => (cs || []).filter((c) => c.id !== id));
+    setFlash({ kind: "ok", text: "Hidden — you won't see this person again." });
+  }
+
+  async function blockMatch(id) {
+    if (!window.confirm("Block this person? You'll be hidden from each other and they'll leave your matches.")) return;
+    await supabase.from("matrimony_blocks").insert({ blocker_id: user.id, blocked_id: id });
+    setMatches((ms) => (ms || []).filter((m) => m.id !== id));
+    loadSummary();
+    setFlash({ kind: "ok", text: "Blocked — you're hidden from each other now." });
+  }
+
+  async function reportMember(id) {
+    const reason = window.prompt("What's the concern? (optional) — this goes privately to the Ghatkaiti admin.");
+    if (reason === null) return; // cancelled
+    await supabase.from("matrimony_reports").insert({ reporter_id: user.id, reported_id: id, reason: reason || null });
+    setFlash({ kind: "ok", text: "Reported — thank you. The admin will review it." });
+  }
+
   const freeLeft = summary ? Math.max(0, FREE_LIMIT - summary.free_used) : null;
 
   return (
@@ -349,20 +394,26 @@ export default function GhatkaitiPage() {
                 phoneCc={phoneCc} phoneNumber={phoneNumber}
                 onPhoneCc={setPhoneCc} onPhoneNumber={setPhoneNumber}
                 consent={consent} onConsent={setConsent}
+                paused={paused} onTogglePause={togglePause} onDelete={deleteBiodata}
               />
             )}
 
             {tab === "browse" && (
-              !approved ? <LockedNote /> : (
+              !approved ? <LockedNote /> : paused ? (
+                <div className="rounded-2xl px-4 py-4 text-sm" style={{ background: "var(--cream-2)" }}>
+                  Your biodata is <strong>paused</strong> — you're hidden from matchmaking and won't see candidates.
+                  Resume from the <strong>My biodata</strong> tab to start browsing again.
+                </div>
+              ) : (
                 <BrowsePanel
                   summary={summary} freeLeft={freeLeft} candidates={candidates}
-                  onInterest={sendInterest} busy={busy} onBuy={buyCredits}
+                  onInterest={sendInterest} busy={busy} onBuy={buyCredits} onHide={hideCandidate}
                 />
               )
             )}
 
             {tab === "matches" && (
-              !approved ? <LockedNote /> : <MatchesPanel matches={matches} />
+              !approved ? <LockedNote /> : <MatchesPanel matches={matches} onBlock={blockMatch} onReport={reportMember} />
             )}
           </>
         )}
@@ -415,7 +466,8 @@ function Tabs({ tab, setTab, approved, matchCount }) {
 // ============================================================
 function BiodataTab({ status, loading, form, set, save, saving, error, savedAt,
                       photos, photoUrls, onAddPhoto, onRemovePhoto, uploadingPhoto,
-                      phoneCc, phoneNumber, onPhoneCc, onPhoneNumber, consent, onConsent }) {
+                      phoneCc, phoneNumber, onPhoneCc, onPhoneNumber, consent, onConsent,
+                      paused, onTogglePause, onDelete }) {
   return (
     <>
       <div className="rounded-3xl p-5 sm:p-6 mb-5" style={{ background: "var(--cream-2)" }}>
@@ -517,14 +569,43 @@ function BiodataTab({ status, loading, form, set, save, saving, error, savedAt,
           </div>
         </form>
       )}
+
+      {!loading && status !== "draft" && (
+        <ManageBiodata status={status} paused={paused} onTogglePause={onTogglePause} onDelete={onDelete} />
+      )}
     </>
+  );
+}
+
+function ManageBiodata({ status, paused, onTogglePause, onDelete }) {
+  return (
+    <div className="rounded-3xl p-5 sm:p-6 mt-5" style={{ background: "var(--paper)", border: "1px solid var(--cream-2)" }}>
+      <div className="text-[11px] tracking-[0.18em] uppercase font-semibold mb-3" style={{ color: "var(--indigo)" }}>Manage</div>
+      {status === "approved" && (
+        <label className="flex items-start gap-2.5 text-sm cursor-pointer mb-4">
+          <input type="checkbox" checked={paused} onChange={(e) => onTogglePause(e.target.checked)}
+                 className="mt-0.5 w-4 h-4 shrink-0" style={{ accentColor: "var(--indigo)" }} />
+          <span style={{ opacity: 0.8 }}>
+            <strong>Pause my biodata</strong> — hide me from Browse and matchmaking. Your data is kept; untick to resume.
+          </span>
+        </label>
+      )}
+      <button type="button" onClick={onDelete}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold"
+              style={{ background: "transparent", color: "var(--vermillion-dark)", border: "1px solid var(--vermillion)" }}>
+        <Trash2 className="w-4 h-4" /> Delete my biodata
+      </button>
+      <p className="text-[11px] mt-2" style={{ opacity: 0.55 }}>
+        Deleting removes your profile, photos, interests and matches permanently.
+      </p>
+    </div>
   );
 }
 
 // ============================================================
 //  Browse panel
 // ============================================================
-function BrowsePanel({ summary, freeLeft, candidates, onInterest, busy, onBuy }) {
+function BrowsePanel({ summary, freeLeft, candidates, onInterest, busy, onBuy, onHide }) {
   const interestsLeft = summary ? freeLeft + summary.credits : null;
   const outOfInterests = summary != null && interestsLeft === 0;
   return (
@@ -564,7 +645,7 @@ function BrowsePanel({ summary, freeLeft, candidates, onInterest, busy, onBuy })
       ) : (
         <div className="space-y-3">
           {candidates.map((c) => (
-            <CandidateCard key={c.id} c={c} onInterest={() => onInterest(c.id)} busy={busy} />
+            <CandidateCard key={c.id} c={c} onInterest={() => onInterest(c.id)} onHide={() => onHide(c.id)} busy={busy} />
           ))}
         </div>
       )}
@@ -572,7 +653,7 @@ function BrowsePanel({ summary, freeLeft, candidates, onInterest, busy, onBuy })
   );
 }
 
-function CandidateCard({ c, onInterest, busy }) {
+function CandidateCard({ c, onInterest, onHide, busy }) {
   return (
     <div className="rounded-2xl p-5" style={{ background: "var(--paper)", border: "1px solid var(--cream-2)" }}>
       <div className="flex items-start justify-between gap-3">
@@ -596,8 +677,9 @@ function CandidateCard({ c, onInterest, busy }) {
           {c.expectations}
         </p>
       )}
-      <div className="mt-4 flex items-center justify-between">
-        <span className="text-[11px]" style={{ opacity: 0.5 }}>Name &amp; contact shown only if it's mutual</span>
+      <div className="mt-3 text-[11px]" style={{ opacity: 0.5 }}>Name &amp; contact shown only if it's mutual</div>
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <button onClick={onHide} className="text-[12px]" style={{ opacity: 0.6 }}>Not interested</button>
         <button onClick={onInterest} disabled={busy}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold disabled:opacity-50"
                 style={{ background: "var(--vermillion)", color: "var(--paper)" }}>
@@ -611,7 +693,7 @@ function CandidateCard({ c, onInterest, busy }) {
 // ============================================================
 //  Matches panel
 // ============================================================
-function MatchesPanel({ matches }) {
+function MatchesPanel({ matches, onBlock, onReport }) {
   if (matches === null) return <Center><Loader2 className="w-5 h-5 animate-spin" style={{ color: "var(--vermillion)" }} /></Center>;
   if (matches.length === 0)
     return <EmptyNote icon={Heart} title="No matches yet"
@@ -648,6 +730,14 @@ function MatchesPanel({ matches }) {
             {m.education && <div><span style={{ opacity: 0.55 }}>Education · </span>{m.education}</div>}
           </div>
           {m.about && <p className="text-sm mt-2 leading-relaxed" style={{ opacity: 0.78 }}>{m.about}</p>}
+          <div className="mt-3 pt-3 flex items-center gap-4 text-[12px]" style={{ borderTop: "1px solid var(--cream-2)" }}>
+            <button onClick={() => onBlock(m.id)} className="inline-flex items-center gap-1.5" style={{ color: "var(--vermillion-dark)", opacity: 0.85 }}>
+              <Ban className="w-3.5 h-3.5" /> Block
+            </button>
+            <button onClick={() => onReport(m.id)} className="inline-flex items-center gap-1.5" style={{ opacity: 0.6 }}>
+              <Flag className="w-3.5 h-3.5" /> Report
+            </button>
+          </div>
         </div>
       ))}
     </div>
