@@ -28,6 +28,19 @@ SERVICE_ROLE = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 
 
+def service_headers():
+    """Auth headers that work for BOTH Supabase key formats:
+    - legacy service_role key (a JWT): PostgREST reads the role from the
+      Authorization Bearer JWT.
+    - new sb_secret_* key (not a JWT): mapped to service_role from `apikey`
+      alone; sending it as a Bearer makes PostgREST fall back to anon.
+    """
+    h = {"apikey": SERVICE_ROLE, "Content-Type": "application/json"}
+    if not (SERVICE_ROLE or "").startswith("sb_"):
+        h["Authorization"] = f"Bearer {SERVICE_ROLE}"
+    return h
+
+
 def grant_credits(session):
     md = session.get("metadata") or {}
     uid = md.get("user_id")
@@ -48,7 +61,7 @@ def grant_credits(session):
     req = urllib.request.Request(
         f"{SUPABASE_URL}/rest/v1/rpc/grant_credits",
         data=payload,
-        headers={"apikey": SERVICE_ROLE, "Content-Type": "application/json"},
+        headers=service_headers(),
         method="POST",
     )
     try:
