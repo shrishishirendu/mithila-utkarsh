@@ -12,7 +12,7 @@ const FILTERS = [
   ["all", "All"],
 ];
 
-const FIELDS = "id, full_name, contact, contact_email, gender, looking_for, dob, birth_time, birth_place, height, mool, gotra, caste, education, profession, family, about, expectations, photos, status, created_at, updated_at";
+const FIELDS = "id, profile_for, full_name, contact, contact_email, gender, looking_for, dob, birth_time, birth_place, country, city, height, mool, gotra, caste, education, profession, family, about, expectations, photos, status, created_at, updated_at";
 
 export default function AdminGhatkaitiPage() {
   const { user, loading: authLoading } = useAuth();
@@ -203,6 +203,8 @@ function BiodataCard({ row, onStatus }) {
         <Field label="Profession" value={row.profession} />
         <Field label="Birth time" value={row.birth_time} />
         <Field label="Birth place" value={row.birth_place} />
+        <Field label="Lives in" value={[row.city, row.country].filter(Boolean).join(", ")} />
+        <Field label="Profile for" value={row.profile_for} />
       </div>
 
       {row.family && <Para label="Family" text={row.family} />}

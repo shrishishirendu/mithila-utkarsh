@@ -118,9 +118,15 @@ function ageFromDob(dob) {
   return a;
 }
 
+const PROFILE_FOR = [
+  ["self", "Myself"], ["son", "My son"], ["daughter", "My daughter"],
+  ["brother", "My brother"], ["sister", "My sister"], ["relative", "My relative"], ["friend", "My friend"],
+];
+
 const BLANK = {
-  full_name: "", contact_email: "",
+  profile_for: "self", full_name: "", contact_email: "",
   gender: "", looking_for: "", dob: "", birth_time: "", birth_place: "",
+  country: "", city: "",
   height: "", mool: "", gotra: "", caste: "", education: "", profession: "",
   family: "", about: "", expectations: "",
 };
@@ -166,9 +172,11 @@ export default function GhatkaitiPage() {
       else if (data) {
         setStatus(data.status || "draft");
         setForm({
+          profile_for: data.profile_for || "self",
           full_name: data.full_name || "", contact_email: data.contact_email || "",
           gender: data.gender || "", looking_for: data.looking_for || "",
           dob: data.dob || "", birth_time: data.birth_time || "", birth_place: data.birth_place || "",
+          country: data.country || "", city: data.city || "",
           height: data.height || "", mool: data.mool || "", gotra: data.gotra || "",
           caste: data.caste || "", education: data.education || "", profession: data.profession || "",
           family: data.family || "", about: data.about || "", expectations: data.expectations || "",
@@ -547,6 +555,13 @@ function BiodataTab({ status, loading, form, set, save, saving, error, savedAt,
               className="rounded-3xl p-6 sm:p-8 space-y-6"
               style={{ background: "var(--paper)", border: "1px solid var(--cream-2)" }}>
 
+          <div className="space-y-3">
+            <div className="text-[11px] tracking-[0.18em] uppercase font-semibold" style={{ color: "var(--indigo)" }}>
+              This profile is for
+            </div>
+            <ChipSelect options={PROFILE_FOR} value={form.profile_for} onChange={set("profile_for")} />
+          </div>
+
           <PhotosSection photos={photos} photoUrls={photoUrls}
                          onAddPhoto={onAddPhoto} onRemovePhoto={onRemovePhoto} uploading={uploadingPhoto} />
 
@@ -563,6 +578,12 @@ function BiodataTab({ status, loading, form, set, save, saving, error, savedAt,
                          options={[["bride", "A bride"], ["groom", "A groom"]]} />
             <DateField label="Date of birth" value={form.dob} onChange={set("dob")} />
             <TextField label="Height" value={form.height} onChange={set("height")} placeholder="e.g. 5'6&quot;" />
+          </Section>
+
+          <Section label="Where you live">
+            <SelectField label="Current country" value={form.country} onChange={set("country")}
+                         options={COUNTRIES.map((c) => [c.name, c.name])} />
+            <TextField label="Current city" value={form.city} onChange={set("city")} placeholder="e.g. Sydney" />
           </Section>
 
           <Section label="Birth details (optional — for kundli)">
@@ -723,6 +744,7 @@ function CandidateCard({ c, onInterest, onHide, busy }) {
         </div>
       </div>
       <div className="mt-2 text-sm space-y-0.5">
+        {c.country && <div><span style={{ opacity: 0.55 }}>Lives in · </span>{c.country}</div>}
         {c.profession && <div><span style={{ opacity: 0.55 }}>Profession · </span>{c.profession}</div>}
         {c.education && <div><span style={{ opacity: 0.55 }}>Education · </span>{c.education}</div>}
       </div>
@@ -764,6 +786,7 @@ function MatchesPanel({ matches, onBlock, onReport }) {
               <CheckCircle2 className="w-3 h-3" /> Mutual match
             </span>
             {m.age != null && <Chip>{m.age} yrs</Chip>}
+            {m.profile_for && m.profile_for !== "self" && <Chip>Family-managed</Chip>}
           </div>
           {m.photoUrls?.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
@@ -782,6 +805,7 @@ function MatchesPanel({ matches, onBlock, onReport }) {
             <div className="mt-0.5 text-sm" style={{ opacity: 0.8 }}>{m.contact_email}</div>
           )}
           <div className="mt-2 text-sm space-y-0.5" style={{ opacity: 0.8 }}>
+            {(m.city || m.country) && <div><span style={{ opacity: 0.55 }}>Lives in · </span>{[m.city, m.country].filter(Boolean).join(", ")}</div>}
             {m.profession && <div><span style={{ opacity: 0.55 }}>Profession · </span>{m.profession}</div>}
             {m.education && <div><span style={{ opacity: 0.55 }}>Education · </span>{m.education}</div>}
           </div>
@@ -979,6 +1003,25 @@ function PhotosSection({ photos, photoUrls, onAddPhoto, onRemovePhoto, uploading
 }
 
 // ---------- form building blocks ----------
+function ChipSelect({ options, value, onChange }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map(([val, label]) => {
+        const active = value === val;
+        return (
+          <button key={val} type="button" onClick={() => onChange(val)}
+                  className="px-3.5 py-2 rounded-full text-sm font-medium transition-colors"
+                  style={active
+                    ? { background: "var(--indigo)", color: "var(--paper)" }
+                    : { background: "var(--cream)", color: "var(--ink)", border: "1px solid var(--cream-2)" }}>
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function Section({ label, children }) {
   return (
     <div className="space-y-4">
