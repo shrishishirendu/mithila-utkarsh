@@ -685,6 +685,20 @@ function ManageBiodata({ status, paused, onTogglePause, onDelete }) {
 function BrowsePanel({ summary, freeLeft, candidates, onInterest, busy, onBuy, onHide }) {
   const interestsLeft = summary ? freeLeft + summary.credits : null;
   const outOfInterests = summary != null && interestsLeft === 0;
+
+  const [fAgeMin, setFAgeMin] = useState("");
+  const [fAgeMax, setFAgeMax] = useState("");
+  const [fCountry, setFCountry] = useState("");
+  const countryOptions = [...new Set((candidates || []).map((c) => c.country).filter(Boolean))].sort();
+  const hasFilters = fAgeMin || fAgeMax || fCountry;
+  const filtered = (candidates || []).filter((c) => {
+    if (fAgeMin && (c.age == null || c.age < Number(fAgeMin))) return false;
+    if (fAgeMax && (c.age == null || c.age > Number(fAgeMax))) return false;
+    if (fCountry && c.country !== fCountry) return false;
+    return true;
+  });
+  const clearFilters = () => { setFAgeMin(""); setFAgeMax(""); setFCountry(""); };
+
   return (
     <>
       {/* Interest balance — "Buy credits" only surfaces once you're out */}
@@ -720,11 +734,45 @@ function BrowsePanel({ summary, freeLeft, candidates, onInterest, busy, onBuy, o
           title="No matches to show right now"
           body="As more Maithil members join and are approved, compatible profiles will appear here." />
       ) : (
-        <div className="space-y-3">
-          {candidates.map((c) => (
-            <CandidateCard key={c.id} c={c} onInterest={() => onInterest(c.id)} onHide={() => onHide(c.id)} busy={busy} />
-          ))}
-        </div>
+        <>
+          {/* Filters */}
+          <div className="rounded-2xl p-3 mb-4 flex flex-wrap items-end gap-x-4 gap-y-2" style={{ background: "var(--cream-2)" }}>
+            <label className="block">
+              <div className="text-[10px] tracking-[0.16em] uppercase mb-1" style={{ opacity: 0.6 }}>Age</div>
+              <div className="flex items-center gap-1.5">
+                <input type="number" value={fAgeMin} onChange={(e) => setFAgeMin(e.target.value)} placeholder="Min"
+                       className="w-16 px-2.5 py-2 rounded-xl text-sm" style={{ background: "var(--paper)", border: "1px solid var(--cream)", outline: "none" }} />
+                <span style={{ opacity: 0.4 }}>–</span>
+                <input type="number" value={fAgeMax} onChange={(e) => setFAgeMax(e.target.value)} placeholder="Max"
+                       className="w-16 px-2.5 py-2 rounded-xl text-sm" style={{ background: "var(--paper)", border: "1px solid var(--cream)", outline: "none" }} />
+              </div>
+            </label>
+            <label className="block">
+              <div className="text-[10px] tracking-[0.16em] uppercase mb-1" style={{ opacity: 0.6 }}>Country</div>
+              <select value={fCountry} onChange={(e) => setFCountry(e.target.value)}
+                      className="px-3 py-2 rounded-xl text-sm" style={{ background: "var(--paper)", border: "1px solid var(--cream)", outline: "none" }}>
+                <option value="">Any</option>
+                {countryOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </label>
+            {hasFilters && (
+              <button onClick={clearFilters} className="text-xs px-3 py-2 self-center" style={{ color: "var(--vermillion-dark)" }}>
+                Clear filters
+              </button>
+            )}
+          </div>
+
+          {filtered.length === 0 ? (
+            <EmptyNote icon={Users} title="No one matches those filters"
+              body="Try widening the age range or clearing the country filter." />
+          ) : (
+            <div className="space-y-3">
+              {filtered.map((c) => (
+                <CandidateCard key={c.id} c={c} onInterest={() => onInterest(c.id)} onHide={() => onHide(c.id)} busy={busy} />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </>
   );
