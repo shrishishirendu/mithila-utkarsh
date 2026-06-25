@@ -432,7 +432,26 @@ export default function GhatkaitiPage() {
         devanagari="घटकैती"
         accentColor="var(--indigo)"
         description="Browse compatible matches as anonymous profiles and mark your interest. Your name and contact stay private — they're shared only when the interest is mutual."
-      />
+      >
+        <figure className="mt-5 max-w-md">
+          <img
+            src="/kohbar.jpg"
+            alt="Kohbar — a traditional Mithila marriage-chamber painting"
+            className="w-full rounded-2xl border"
+            style={{ borderColor: "var(--cream-2)" }}
+            loading="lazy"
+          />
+          <figcaption className="mt-2 text-[11px] leading-snug" style={{ opacity: 0.6 }}>
+            “Kohbar with Shree Yantra” by{" "}
+            <a href="https://commons.wikimedia.org/wiki/File:KOHBAR_BY_ARTI_KUMARI.jpg"
+               target="_blank" rel="noreferrer" className="underline">Arti Kumari</a>
+            , licensed{" "}
+            <a href="https://creativecommons.org/licenses/by-sa/4.0/"
+               target="_blank" rel="noreferrer" className="underline">CC BY-SA 4.0</a>
+            , via Wikimedia Commons.
+          </figcaption>
+        </figure>
+      </PageHero>
 
       <section className="px-6 lg:px-10 max-w-2xl mx-auto">
         {authLoading ? (
