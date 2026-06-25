@@ -10,20 +10,20 @@ import { supabase } from "../lib/supabase.js";
 import { PageHero } from "../components/PageBuildingBlocks.jsx";
 import { BorderPattern } from "../components/Motifs.jsx";
 
-const FREE_LIMIT = 2;
+const FREE_LIMIT = 25; // growth phase — keep in sync with send_interest() free_limit
 const MAX_PHOTOS = 3;
 const PHOTO_BUCKET = "matrimony-photos";
 
 // Flip to true once the Stripe keys are set in Vercel (and tested). Until then
 // "Buy credits" shows a friendly "coming soon" instead of a broken checkout.
-const PAYMENTS_LIVE = true;
+const PAYMENTS_LIVE = false;
 
 // Display only — the CHARGED amount lives server-side in api/create-checkout.py
 // (PACKS). Keep ids in sync with that file.
 const CREDIT_PACKS = [
-  { id: "p10", credits: 10, price: "$5" },
-  { id: "p25", credits: 25, price: "$10", best: true },
-  { id: "p60", credits: 60, price: "$20" },
+  { id: "p5",  credits: 5,  price: "$10" },
+  { id: "p25", credits: 25, price: "$40" },
+  { id: "p50", credits: 50, price: "$50", best: true },
 ];
 
 // Full country dial-code list as [dial, ISO-2, name]. Flags are derived from the

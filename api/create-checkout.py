@@ -27,9 +27,9 @@ CURRENCY = "usd"
 # Edit prices here (amount is in cents). Keep ids in sync with CREDIT_PACKS in
 # src/pages/GhatkaitiPage.jsx (display only — this is what actually gets charged).
 PACKS = {
-    "p10": {"credits": 10, "amount": 500,  "name": "10 Ghatkaiti interests"},
-    "p25": {"credits": 25, "amount": 1000, "name": "25 Ghatkaiti interests"},
-    "p60": {"credits": 60, "amount": 2000, "name": "60 Ghatkaiti interests"},
+    "p5":  {"credits": 5,  "amount": 1000, "name": "5 Ghatkaiti interests"},
+    "p25": {"credits": 25, "amount": 4000, "name": "25 Ghatkaiti interests"},
+    "p50": {"credits": 50, "amount": 5000, "name": "50 Ghatkaiti interests"},
 }
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL") or os.environ.get("VITE_SUPABASE_URL")
