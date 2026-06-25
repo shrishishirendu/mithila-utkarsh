@@ -433,11 +433,11 @@ export default function GhatkaitiPage() {
         accentColor="var(--indigo)"
         description="Browse compatible matches as anonymous profiles and mark your interest. Your name and contact stay private — they're shared only when the interest is mutual."
       >
-        <figure className="mt-5 max-w-md">
+        <figure className="mt-5">
           <img
             src="/kohbar.jpg"
             alt="Kohbar — a traditional Mithila marriage-chamber painting"
-            className="w-full rounded-2xl border"
+            className="w-full h-44 sm:h-60 object-cover rounded-2xl border"
             style={{ borderColor: "var(--cream-2)" }}
             loading="lazy"
           />
