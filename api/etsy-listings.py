@@ -19,6 +19,7 @@ import json
 import os
 import urllib.request
 import urllib.parse
+import urllib.error
 
 API_KEY = os.environ.get("ETSY_API_KEY")
 SHOP_ID = os.environ.get("ETSY_SHOP_ID")
@@ -30,9 +31,18 @@ def etsy_get(path, params=None):
     url = f"{BASE}{path}"
     if params:
         url += "?" + urllib.parse.urlencode(params)
-    req = urllib.request.Request(url, headers={"x-api-key": API_KEY})
-    with urllib.request.urlopen(req, timeout=9) as r:
-        return json.loads(r.read() or b"{}")
+    req = urllib.request.Request(url, headers={
+        "x-api-key": API_KEY,
+        "Accept": "application/json",
+        # Etsy's edge blocks default/empty User-Agents with a 403.
+        "User-Agent": "MithilaUtkarsh/1.0 (+https://mithilautkarsh.com)",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=9) as r:
+            return json.loads(r.read() or b"{}")
+    except urllib.error.HTTPError as he:
+        body = he.read().decode("utf-8", "replace")[:300]
+        raise Exception(f"etsy {he.code} on {path}: {body}")
 
 
 def resolve_shop_id():
