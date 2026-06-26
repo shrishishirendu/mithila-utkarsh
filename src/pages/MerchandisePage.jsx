@@ -5,6 +5,7 @@ import {
 import {
   PageHero, CapabilityGrid, RoadmapBar, NotifyMe, PreviewCard,
 } from "../components/PageBuildingBlocks.jsx";
+import { FEATURED_PRODUCTS, ETSY_SHOP_URL } from "../data/shop.js";
 
 const CAPABILITIES = [
   { icon: Shirt, title: "Apparel with intention",
@@ -138,7 +139,10 @@ export default function MerchandisePage() {
     return () => { cancelled = true; };
   }, []);
 
-  const products = data?.products || [];
+  // Live Etsy listings win when the API is connected; otherwise the curated list.
+  const apiProducts = data?.products || [];
+  const products = apiProducts.length > 0 ? apiProducts : FEATURED_PRODUCTS;
+  const shopUrl = data?.shop_url || ETSY_SHOP_URL;
   const hasProducts = products.length > 0;
 
   return (
@@ -157,7 +161,7 @@ export default function MerchandisePage() {
           <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--vermillion)" }} />
         </div>
       ) : hasProducts ? (
-        <ShopGrid products={products} shopUrl={data.shop_url} />
+        <ShopGrid products={products} shopUrl={shopUrl} />
       ) : (
         <ComingSoon />
       )}

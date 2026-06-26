@@ -55,6 +55,17 @@ def resolve_shop_id():
     return str(results[0]["shop_id"]) if results else None
 
 
+def listing_image(listing_id):
+    try:
+        data = etsy_get(f"/listings/{listing_id}/images", {"limit": 1})
+        imgs = data.get("results") or []
+        if imgs:
+            return imgs[0].get("url_570xN") or imgs[0].get("url_fullxfull")
+    except Exception:
+        pass
+    return None
+
+
 def fetch_products():
     sid = resolve_shop_id()
     if not sid:
@@ -69,6 +80,8 @@ def fetch_products():
         image = None
         if imgs:
             image = imgs[0].get("url_570xN") or imgs[0].get("url_fullxfull")
+        if not image:  # active-listings endpoint often omits images — fetch directly
+            image = listing_image(L.get("listing_id"))
         out.append({
             "id": L.get("listing_id"),
             "title": L.get("title"),
