@@ -27,6 +27,9 @@ import LiteratureContributionPage from "./pages/LiteratureContributionPage.jsx";
 import AdminLiteraturePage from "./pages/AdminLiteraturePage.jsx";
 import AdminGhatkaitiPage from "./pages/AdminGhatkaitiPage.jsx";
 import ArtsPage from "./pages/ArtsPage.jsx";
+import ArtDetailPage from "./pages/ArtDetailPage.jsx";
+import ArtsContributePage from "./pages/ArtsContributePage.jsx";
+import AdminArtsPage from "./pages/AdminArtsPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogPostPage from "./pages/BlogPostPage.jsx";
 
@@ -50,6 +53,8 @@ const router = createBrowserRouter([
       { path: "literature/c/:id",   element: <LiteratureContributionPage /> },
       { path: "literature/:slug",   element: <LiteratureWorkPage /> },
       { path: "arts",               element: <ArtsPage /> },
+      { path: "arts/contribute",    element: <ArtsContributePage /> },
+      { path: "arts/:slug",         element: <ArtDetailPage /> },
       { path: "blog",               element: <BlogPage /> },
       { path: "blog/:slug",         element: <BlogPostPage /> },
       { path: "membership",         element: <MembershipPage /> },
@@ -61,6 +66,7 @@ const router = createBrowserRouter([
       { path: "profile",            element: <ProfilePage /> },
       { path: "admin/words",        element: <AdminWordsPage /> },
       { path: "admin/literature",   element: <AdminLiteraturePage /> },
+      { path: "admin/arts",         element: <AdminArtsPage /> },
       { path: "admin/ghatkaiti",    element: <AdminGhatkaitiPage /> },
       { path: "*",                  element: <NotFoundPage /> },
     ],
